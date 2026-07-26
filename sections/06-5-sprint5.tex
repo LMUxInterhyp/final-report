@@ -28,9 +28,11 @@ The methodologically most important work of the sprint sits beneath these views.
 
 Deployment made PropDesk available at a public URL, with sign-in through Google SSO and an email whitelist, and completed the architecture shown in \cref{fig:sprint5-architecture}. A React frontend served from a CDN communicates with Convex, which acts as database, vector store, and job queue at once, while a long-running Python worker polls for jobs and executes the router, judge, and optimizer pipelines. A single environment variable switches the pipeline between a fully local mode, a production mode that routes judge and optimizer through AWS Bedrock in the eu-central-1 region to satisfy Interhyp's EU data residency requirement, and an OpenRouter mode for environments that cannot host models locally.
 
-\begin{figure}
+% Tall, dense diagram: give it a dedicated float page instead of letting it
+% claim three quarters of a text page and leave the rest empty.
+\begin{figure}[p]
 \centering
-\includegraphics[width=0.85\linewidth,height=\textheight,keepaspectratio]{assets/sprints/sprint5-deployment-architecture.png}
+\includegraphics[width=0.95\linewidth,height=0.88\textheight,keepaspectratio]{assets/sprints/sprint5-deployment-architecture.png}
 \caption{Deployment architecture of PropDesk across identity, frontend, backend, and worker layers.}\label{fig:sprint5-architecture}
 \end{figure}
 

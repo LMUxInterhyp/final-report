@@ -10,3 +10,4 @@ build/
 *.lof
 *.lot
 
+.DS_Store

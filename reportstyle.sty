@@ -27,6 +27,8 @@
 \RequirePackage[hidelinks,pdfusetitle]{hyperref}
 \RequirePackage{bookmark}
 \RequirePackage[nameinlink,noabbrev]{cleveref}
+\RequirePackage{placeins}
+\RequirePackage{etoolbox}
 \RequirePackage[
   backend=biber,
   style=authoryear,
@@ -106,6 +108,37 @@
 \captionsetup{font=small,labelfont=normalfont,justification=centering,singlelinecheck=true}
 \captionsetup[figure]{name=Fig.,position=bottom}
 \captionsetup[table]{name=Tab.,position=bottom}
+
+% Cross-references must use the same labels as the captions, so \cref prints
+% "Fig. 4-1" and "Tab. 4-1" instead of cleveref's default "figure"/"table".
+% This also prevents a lowercase reference at the start of a sentence.
+\crefname{figure}{Fig.}{Figs.}
+\Crefname{figure}{Fig.}{Figs.}
+\crefname{table}{Tab.}{Tabs.}
+\Crefname{table}{Tab.}{Tabs.}
+
+% Floats must not drift out of the subsection they belong to. Without this a
+% deferred figure can surface pages later inside another author's section.
+\pretocmd{\section}{\FloatBarrier}{}{}
+\pretocmd{\subsection}{\FloatBarrier}{}{}
+
+% Relaxed float parameters so figures are placed near their reference instead
+% of accumulating in a backlog.
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.7}
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{4}
+
+% Pandoc emits \begin{figure} without a placement specifier, which defaults to
+% [tbp] and pushes figures to the top of a later page, away from their reference.
+% Allow "here" as the first option instead.
+\makeatletter
+\renewcommand*{\fps@figure}{htbp}
+\renewcommand*{\fps@table}{htbp}
+\makeatother
 
 \setlist[itemize]{leftmargin=2.2em,itemsep=0.35em,topsep=0.4em}
 \setlist[enumerate]{leftmargin=2.4em,itemsep=0.35em,topsep=0.4em}
