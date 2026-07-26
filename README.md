@@ -30,7 +30,3 @@ The generated PDF is written to `build/main.pdf`.
 - `frontmatter/` contains the abstract, highlights, and declaration.
 - `assets/` contains the consolidated figures and the named signature-image slots.
 - `references.bib` is the shared bibliography.
-
-## Pending contributions
-
-Clearly marked placeholders remain for Gáspár Harmati's initial project setup, optimizer, Sprint 2, and empirical-evaluation sections. The abstract, highlights, and conclusion are intentionally left for final synthesis after those results are integrated. Signature images still need to be added before submission.
