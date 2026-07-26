@@ -6,6 +6,15 @@ Sprint 1 ran from 28 April to 11 May 2026, with Julius acting as Scrum Master. F
 
 Responsibilities followed these workstreams. Marco established the Jira structure and led the research on LLM judges, judge panels, and their biases. Julius created the repositories and initial application, implemented the first chatbot interface, prepared the sprint documentation, and coordinated the sprint. Mohsin investigated inference-token access and external providers. Sebastian selected and documented the local Ollama setup and researched multi-agent routing. Gáspár defined the initial metrics and researched prompt optimization, DSPy, and self-improving pipelines. The architecture, MVP definition, repository strategy, and Sprint Review were developed collaboratively.
 
+\Cref{fig:sprint1-backlog} shows the six work items recorded in Jira at the end of the sprint, including the additional two-point task for establishing a local LLM setup after no external token provider was available.
+
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{assets/sprints/sprint1-backlog.png}}
+\caption{Sprint 1 backlog in Jira with story-point estimates and completion status.}
+\label{fig:sprint1-backlog}
+\end{figure}
+
 \subsubsection{Implementation and Sprint Execution}\label{sec:sprint1-execution}
 
 The team created the \texttt{LMUxInterhyp} GitHub organization with two repositories serving different purposes. The \texttt{pipeline} repository provided an experimental environment for rapidly exploring Router, judge, and optimization approaches. The \texttt{chatbot} repository formed the maintainable codebase for the integrated showcase application. Validated ideas could therefore be reimplemented in the application without treating exploratory Python code as its foundation. Jira issues were linked to branches and pull requests, supported by automated checks and preview deployments.
