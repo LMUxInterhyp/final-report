@@ -1,0 +1,60 @@
+\section*{Declaration of Authenticity}
+
+% Official wording:
+% https://cms-cdn.lmu.de/media/15-soziologie/studium/ma-eigenstandigkeitserklarung_en.pdf
+I hereby declare that I have written this Master thesis independently and without outside
+assistance, that I did not use any other sources apart from the ones stated in the bibliography
+and that I have clearly cited all passages in my work that were taken from other sources. This
+Master thesis has never been previously submitted in its current or similar form in any other
+course and/or degree program. I agree that the examiner can electronically check my work by
+using the appropriate software.
+
+\vspace{1.5cm}
+\submissionplace, \submissiondate
+
+\newcommand{\insertsignature}[1]{%
+  \IfFileExists{assets/signatures/#1.png}{%
+    \includegraphics[width=0.85\linewidth,height=1.25cm,keepaspectratio]{assets/signatures/#1.png}%
+  }{%
+    \IfFileExists{assets/signatures/#1.jpg}{%
+      \includegraphics[width=0.85\linewidth,height=1.25cm,keepaspectratio]{assets/signatures/#1.jpg}%
+    }{%
+      \IfFileExists{assets/signatures/#1.jpeg}{%
+        \includegraphics[width=0.85\linewidth,height=1.25cm,keepaspectratio]{assets/signatures/#1.jpeg}%
+      }{%
+        \IfFileExists{assets/signatures/#1.pdf}{%
+          \includegraphics[width=0.85\linewidth,height=1.25cm,keepaspectratio]{assets/signatures/#1.pdf}%
+        }{}%
+      }%
+    }%
+  }%
+}
+
+\newcommand{\signatureblock}[2]{%
+  \begin{minipage}[t]{0.46\textwidth}
+    \centering
+    \begin{minipage}[c][1.4cm][c]{0.9\linewidth}
+      \centering
+      \insertsignature{#1}
+    \end{minipage}\par
+    \rule{0.9\linewidth}{0.4pt}\par
+    {\small #2}
+  \end{minipage}%
+}
+
+\vspace{0.8cm}
+\noindent
+\signatureblock{julius-bethge}{Julius Bethge}
+\hfill
+\signatureblock{gaspar-harmati}{G\'asp\'ar Harmati}
+
+\vspace{0.8cm}
+\noindent
+\signatureblock{mohsin-saeed}{Mohsin Saeed}
+\hfill
+\signatureblock{marco-fabian-schroeder}{Marco-Fabian Schr\"oder}
+
+\vspace{0.8cm}
+\begin{center}
+  \signatureblock{sebastian-straub}{Sebastian Straub}
+\end{center}

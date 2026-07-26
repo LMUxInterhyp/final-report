@@ -1,0 +1,148 @@
+\section{Chatbot Showcase Application}\label{sec:chatbot-application}
+
+\subsection{Purpose and Design Rationale}\label{sec:application-purpose}
+
+The pipeline components presented in the preceding chapter were integrated into a fully functioning showcase application. It provides one environment in which a user query can be routed, its trace inspected and evaluated, and resulting examples used for training or prompt optimization. The application was used by the project team, our Interhyp partners from the Data Science team, and is available to the supervisors from the LMU. It supported the development and evaluation of the pipeline as well as its demonstration within a fully functioning application. It is not an advisor-facing production system, a replacement for Robin, or a system already integrated into Interhyp's operational environment.
+
+The project team used the application to develop the integrated pipeline, inspect component execution, and compare configurations and run results. It was also used to show our Interhyp partners the evaluation of the pipeline and discuss its behavior and possible integration into an Interhyp context. The demonstrator can therefore be interpreted as a potential boundary object, meaning a shared representation that remains recognizable across groups while supporting different uses.\autocite{star-griesemer} This describes its intended role rather than an empirically tested organizational effect.
+
+The showcase was necessary because isolated component tests could not communicate how the complete approach behaved. A Router implementation, judge script, or optimizer experiment can demonstrate how one method works, but not how its outputs become inputs to subsequent activities or how project participants can inspect this transition. The application therefore serves both an operational and explanatory purpose. It executes the integrated pipeline and exposes the relationships that would otherwise remain distributed across scripts, files, and experiment logs.
+
+The repository strategy separated experimentation from application engineering from the outset. The \texttt{pipeline} repository contained exploratory and reference implementations for quickly comparing Router, judge, and optimizer approaches. It was not intended as the final integrated codebase. The \texttt{chatbot} repository was planned as the maintainable showcase application into which validated approaches would be reimplemented. This arrangement accommodated iterative machine-learning work while ensuring that selected approaches were integrated with the surrounding software system in a controlled form.\autocite{amershi-ml-se}
+
+Initial connections in the showcase invoked Python through subprocesses and exchanged local files. They confirmed that components could run together but could not provide shared persistent state, reliable coordination of longer jobs, real-time progress, or traceable relationships between a query, its routing decision, answer, judge outcome, and later optimization use. These requirements illustrate why model code forms only one part of a complete machine-learning system.\autocite{sculley-technical-debt} We consequently retained the pipeline as a modular Python worker and built Convex and React around it for orchestration, persistence, and presentation. This preserved access to Python AI libraries and made providers replaceable, while managed services accelerated integration and deployment.
+
+\subsection{Modular Architecture and Technology Rationale}\label{sec:application-architecture}
+
+\subsubsection{Overall Architecture and Execution Flow}\label{sec:application-flow}
+
+The architecture consists of a React frontend, Convex backend, and Python worker. Convex forms the shared state and orchestration layer. The frontend never calls the worker directly. This reflects the idea of a layered modular architecture in which components communicate through defined interfaces and can evolve or be recombined.\autocite{yoo-digital-innovation} Its specific realization with React, Convex, and Python is a project decision.
+
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{assets/application/architecture.png}}
+\caption{Technical stack connecting the React frontend, Convex state layer, Python pipeline worker, and model providers}
+\label{fig:application-architecture}
+\end{figure}
+
+Each operation is represented as a job. The frontend creates a queued job through Convex, after which the worker polls for and claims it. During execution, the worker writes step statuses, inputs, outputs, errors, and timestamps back to Convex and finally stores the resulting trace or run. Frontend subscriptions expose these changes while the job is running. This decouples the browser from longer computation and keeps completed results available after a reload. Persistent traces connect the same execution to the chatbot, pipeline view, judge, training workflow, and optimization history.
+
+The job protocol uses explicit states such as queued, claimed, running, successful, and failed. Pipeline steps independently record whether they are pending, active, completed, skipped, or unsuccessful. These distinctions allow the interface to represent both the overall job and the path taken through conditional pipeline branches. They also prevent completion of a browser request from being confused with completion of the underlying computation. Interactive chat jobs and longer batch or optimization jobs use the same coordination principle even though their duration and outputs differ.
+
+\subsubsection{Python Worker}\label{sec:python-worker}
+
+Python is broadly used for machine-learning and AI development and provides an extensive ecosystem of relevant libraries \autocite{raschka-python-ml}. This ecosystem made the libraries and service integrations required for embedding, model access, evaluation, and optimization readily available. Python was therefore retained from the experimental work for the integrated implementation.
+
+The Python worker contains all pipeline logic itself. This includes Stage 1 embedding and similarity processing, Stage 2 routing, agent generation, judge comparisons, batch processing, index construction, and OPRO optimization. Convex schedules these operations and persists their state but does not reproduce their logic.
+
+Provider interfaces separate routing, completion, judging, optimization, and embedding responsibilities from individual model services. Environment variables alter how models are used by selecting the execution mode, model identifiers, endpoints, timeouts, and provider credentials. The local mode connects Stage 2 routing, agent generation, judging, and optimization to configured Ollama models. The deployed mode uses OpenRouter for Stage 2 routing and configured AWS Bedrock models for agent generation, judging, and optimization. These changes do not alter the job protocol, trace model, or pipeline interfaces. Accordingly, Convex and React constitute the showcase environment, whereas the worker is the reusable pipeline component. An internal Interhyp platform could connect to adapted worker interfaces and substitute approved model endpoints. This portability was an objective. An actual integration into Interhyp's systems was not performed.
+
+Keeping all pipeline decisions in the worker also establishes a clear ownership boundary. The backend is responsible for durable state and coordination, but it does not decide how a query is embedded, when Stage 2 is required, how judge candidates are compared, or how an optimizer proposes prompts. As a result, replacing Convex or the frontend would not require these rules to be reconstructed from application code.
+
+\subsubsection{LLM and Embedding Provider Layer}\label{sec:provider-layer}
+
+Pipeline stages impose different model requirements, so the provider layer combines several implementations behind common worker interfaces. For Stage 1, \texttt{multilingual-e5-large} is loaded and executed inside the Python worker through FastEmbed, a lightweight Python runtime based on ONNX Runtime and quantized model weights.\autocite{fastembed-docs} This worker-local execution is used in both development and the hosted application. Using the same embedding approach as the experimental repository avoided changing embedding behavior during integration. Computational efficiency was considered alongside capability,\autocite{schwartz-green-ai} contributing to the worker-local setup. A production deployment should still compare per-worker execution with a central embedding service, particularly when scaling the number of workers.
+
+Stage 2 needs token log probabilities to derive comparable agent probabilities. OpenRouter exposes returned-token probabilities through \texttt{logprobs} and candidate-token probabilities through \texttt{top\_logprobs}.\autocite{openrouter-parameters} It was therefore used for Stage 2 in the deployed configuration, but not for the more frequent or expensive agent, judge, and optimization calls because its costs were less suitable for those workloads.
+
+AWS Bedrock supplied more capable hosted models for agent responses, judge comparisons, and OPRO. Free AWS credits made these calls feasible for the demonstrator. Ollama served as a free option during development and supported several evaluation, training, and optimization runs on a developer's computer. These runs often required substantial execution time, particularly for repeated or batch workflows. The main reason Ollama was not used in the deployed configuration, however, was that the showcase had to execute independently of a user's or developer's computer. OpenRouter and Bedrock provided endpoints that the hosted worker could access directly.
+
+Environment configuration selects the local Ollama setup or the hosted OpenRouter and Bedrock combination. These choices are not fixed properties of the pipeline: the same interfaces could be adapted to Interhyp-approved models.
+
+\subsubsection{Convex Backend}\label{sec:convex-backend}
+
+Convex is the central orchestration and state layer. It stores jobs and steps, traces, prompt versions, vector entries, evaluation and training runs, and optimization history. Reactive queries update subscribed clients when relevant data changes,\autocite{convex-realtime} allowing worker progress to appear without a separate WebSocket service or frontend polling. Integrated, schema-defined vector indexes support similarity search over stored embeddings,\autocite{convex-vector-search} keeping Stage 1 entries with their source traces. Generated TypeScript definitions additionally connect backend functions with frontend queries and mutations.
+
+Persistence makes lineage explicit. Prompt changes create immutable versions, while separate state identifies the deployed version. Batch runs retain their configuration and dataset snapshot. Traces connect queries to routing scores, agents, prompt versions, answers, timings, and judge outcomes. Training and optimization records identify the inputs and base prompt that produced them.
+
+This extends model-management principles that emphasize retaining parameters, metrics, datasets, and historical changes for comparison.\autocite{vartak-modeldb} The showcase additionally treats prompts as versioned configuration and links evaluation and optimization runs. Reproducibility likewise depends on accessible data and code and sufficiently specified procedures and execution conditions.\autocite{pineau-reproducibility} Storage alone does not reproduce a result, but it allows comparisons to remain tied to identifiable datasets, prompts, and configurations.
+
+This distinction is particularly important when the deployed prompt changes. A later run must not silently inherit the label of an earlier configuration, and modifications to a dataset must not retrospectively change the basis of an existing result. The stored snapshots preserve what was evaluated at the time of execution. Run comparison can therefore show differences together with the prompt version, dataset identity, and configuration that contextualize them. The backend explanation focuses on these relationships rather than enumerating every database table.
+
+\subsubsection{React Frontend}\label{sec:react-frontend}
+
+The React single-page frontend uses Vite, TypeScript, and Tailwind CSS. It starts workflows through Convex mutations, subscribes to state, and renders live and completed executions. This suited frequent movement between chat, pipeline, evaluation, training, and optimization views. Public search indexing and server rendering were irrelevant to the internal demonstrator. React components share status indicators, selectors, scores, controls, and detail panels. TypeScript complements Convex's generated definitions across backend calls and components, while Vite and Tailwind supported rapid development and consistent implementation.
+
+Because Convex supplies updated query results, the frontend can render worker state as ordinary application state rather than manage a second real-time communication channel. The same component can first display a pending execution and later its completed trace. This was especially useful for the pipeline and optimization views, whose content develops incrementally while remaining connected to a persistent run.
+
+\subsubsection{Authentication and Deployment}\label{sec:application-deployment}
+
+Database access from the frontend and the Python worker follows separate authorization paths. Frontend users authenticate through Clerk, after which Convex authorizes their requests through configured email and domain allowlists. The Python worker instead supplies a shared worker token to dedicated worker-facing functions before it can claim jobs or update execution state. A frontend session therefore cannot invoke worker operations, and the worker token does not provide frontend access.
+
+Netlify serves the React build, Convex Cloud hosts backend state, and Fly.io runs the containerized worker. A Fly volume retains the FastEmbed cache across restarts. The frontend initially ran on Vercel but moved to Netlify because the required plan cost USD 20 per developer monthly. Five developers over three months would have cost USD 300. Ollama remained a local development option but was not part of the hosted topology.
+
+These boundaries distinguish frontend-originated requests from worker-originated state changes. A valid Clerk session establishes the frontend user's identity, while the allowlists determine whether that account may use the demonstrator. The shared worker token is accepted only by worker-facing functions. This arrangement was sufficient for the controlled showcase, although a production integration would require Interhyp to evaluate its own service-identity and secret-management requirements.
+
+\subsection{Application Workflows and User Interface}\label{sec:application-workflows}
+
+The interface supports individual chatbot execution, pipeline inspection, and evaluation, training, and optimization. Visible status, consistent controls, and inspectable results reflect Nielsen's usability principles.\autocite{nielsen-usability}
+
+\subsubsection{Chatbot Interface}\label{sec:chatbot-interface}
+
+After a user submits one request, the interface creates a chat job and shows its pending state. The routing summary and message area update as the worker completes Stage 1, possible Stage 2 escalation, and agent generation. The completed view shows the answer, selected agent, routing stage, leading scores or probabilities, threshold, and timings. Users can open the matching vector entry or prompt version where available, while previous interactions remain selectable in the trace history.
+
+Interactions are intentionally single-turn and produce self-contained traces. This limits conversational state as a confounding factor and provides later evaluation with a stable unit containing the query, decision, answer, configuration, and timings. A completed trace can be opened in the pipeline view or submitted to the judge.
+
+The trace history is more than a convenience for reopening chats. It provides the navigation point between the user-facing answer and its technical evidence. Selecting an earlier interaction restores its answer and routing summary without creating a new model call, allowing two executions to be discussed while preserving their individual conditions.
+
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{assets/application/chatbot-interface.png}}
+\caption{Completed chatbot interaction with routing scores, trace history, and judge summary}
+\label{fig:chatbot-interface}
+\end{figure}
+
+\subsubsection{Pipeline View}\label{sec:pipeline-view}
+
+The pipeline view presents Router and judge execution as connected graphs. Nodes represent major steps and edges show their order and conditional paths. Pending, running, successful, skipped, and failed states change with the worker records. Stage 1 success follows a different visible path from Stage 2 escalation, and the judge pipeline becomes available for completed traces.
+
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{assets/application/router-pipeline.png}}
+\caption{Router pipeline with the successful Stage 1 route and node inspector}
+\label{fig:application-router-pipeline}
+\end{figure}
+
+Selecting a node opens an inspector with status, duration, inputs, outputs, scores, prompt or vector references, and stored payloads. This design applies Shneiderman's principle of providing an overview before details on demand.\autocite{shneiderman-eyes} It helps users understand an answer, locate unexpected execution and connect outcomes with intermediate evidence.
+
+Conditional branches remain visible even when they are not executed, with their status distinguishing a skipped step from a failed one. This prevents a shortened Stage 1 path from appearing incomplete and makes Stage 2 escalation explicit. Router and judge diagrams share the same interaction pattern, so users can move from a high-level outcome to the evidence stored for a particular step without learning a separate inspection mechanism.
+
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{assets/application/judge-pipeline.png}}
+\caption{Judge pipeline with the response-comparison step selected in the node inspector}
+\label{fig:application-judge-pipeline}
+\end{figure}
+
+\subsubsection{Evaluation, Training and Optimization}\label{sec:evaluation-training-optimization}
+
+The evaluation view runs a selected prompt version against the fixed evaluation dataset. Progress and individual outcomes remain visible during execution. Completed runs summarize accuracy, Stage 1 usage, latency, avoided LLM calls, misroutes, and per-agent results. Historical runs can be selected or compared while their prompt versions and configuration snapshots remain visible. A candidate can therefore be assessed under identifiable conditions before deployment.
+
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{assets/application/evaluation-run.png}}
+\caption{Completed evaluation run with routing, latency, and per-agent results}
+\label{fig:application-evaluation}
+\end{figure}
+
+Training remains separate. Users upload labelled examples, and the application validates them and removes overlaps with the evaluation set. The resulting batch executes Router and judge workflows and records suitable Stage 1 corrections. A separate index-building job creates vector entries and threshold configuration while exposing its steps. This prevents evaluation examples from silently becoming training data.
+
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{assets/application/training-run.png}}
+\caption{Completed training run with routing, judge, cost, and trace-level results}
+\label{fig:application-training}
+\end{figure}
+
+The optimization view applies OPRO to completed training data. Users follow rounds, candidate scores, and the optimization trajectory and can compare candidate prompts with the base prompt. Selecting a candidate creates a new prompt version. After evaluation, a version can be deployed without overwriting its predecessors.
+
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{assets/application/optimization-run.png}}
+\caption{Optimization trajectory showing the seed, candidate scores, and best fixed-evaluation result}
+\label{fig:application-optimization}
+\end{figure}
+
+Together, the views create a traceable improvement cycle: training provides corrections and optimization inputs, optimization produces versioned candidates, and evaluation compares them on a fixed basis. Configuration snapshots, prompt lineage, and immutable run datasets allow users to move from aggregate results back to the runs and traces on which they depend.
+
+The interface consequently distinguishes three actions that could otherwise be conflated. Evaluation measures a selected configuration without modifying the Stage 1 index. Training processes labelled examples and can contribute corrections to that index. Optimization searches for a stronger Stage 2 prompt but does not automatically replace the deployed version. Making these transitions explicit supports controlled experimentation and prevents a completed run from being mistaken for an automatically accepted system change.
