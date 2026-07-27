@@ -3,29 +3,15 @@
 
 This section evaluates whether the implemented optimization pipeline improves Router accuracy under controlled conditions. All experiments use the synthetic data introduced in \cref{sec:golden-dataset}, since Interhyp could not provide production queries. The reported results therefore demonstrate the behavior of the pipeline on the project datasets rather than its performance under live broker traffic.
 
-The evaluation separates two datasets with different purposes. A fixed set of 240 queries serves exclusively as the evaluation dataset and remains unchanged across the baseline and final measurements. A distinct set of 1,000 queries is used to generate judge feedback and optimize the Stage 2 prompt. No query from the fixed evaluation set is included in the optimization data. This separation prevents the optimizer from adapting directly to the cases on which the final result is reported.
-
-\begin{table}[htbp]
-\centering
-\caption{Datasets used in the final empirical evaluation (own illustration).}
-\label{tbl:empirical-datasets}
-\begin{tabular}{@{}p{0.27\linewidth}rp{0.34\linewidth}c@{}}
-\toprule
-Dataset & Queries & Purpose & Optimization input \\
-\midrule
-Fixed evaluation dataset & 240 & Baseline and final evaluation & No \\
-Training dataset & 1,000 & Judge-label generation and OPRO optimization & Yes \\
-\bottomrule
-\end{tabular}
-\end{table}
+Both datasets were drawn as disjoint subsets of Stage 4 of the four-stage golden dataset (\cref{sec:dataset-stages}). A fixed set of 240 queries was reserved exclusively for baseline and final evaluation, while a separate set of 1,000 queries was used to generate judge feedback and optimize the Stage 2 prompt. This separation tests whether the optimized prompt generalizes beyond the data used for optimization rather than merely fitting it. In a production setting, the equivalent safeguard would be to optimize on judge-labelled traffic and validate a candidate prompt on a separate human-labelled sample before deployment.
 
 The experiments also distinguish the two routing stages described in \cref{sec:router}. Stage 1 performs similarity-based routing through the vector store, whereas Stage 2 uses the LLM-based Router and its versioned system prompt. The main optimization experiment deliberately isolates Stage 2. This mirrors Interhyp's current production setup, which has no direct equivalent of the implemented Stage 1, and makes it possible to attribute changes in accuracy to prompt optimization rather than to additions to the vector store.
 
 \subsection{Baseline: Stage 2 with the Original Prompt}\label{sec:empirical-baseline}
 
-The baseline was measured in the Evaluation Dashboard on the fixed set of 240 queries. Every query was routed through Stage 2; Stage 1 was not used. The Stage 2 system prompt was intentionally minimal, \enquote{You are a Router, route the query to the correct agent}, and was supplemented only by broad descriptions of the eight agents and a small number of few-shot examples. This configuration approximated the routing approach available at Interhyp at the beginning of the project and therefore provided the relevant point of comparison for the optimization pipeline.
+The baseline was measured in the Evaluation Dashboard on the fixed set of 240 queries. Every query was routed through Stage 2. Stage 1 was disabled. The Stage 2 system prompt was intentionally minimal and contained only a short routing instruction, broad descriptions of the eight agents, and a small number of few-shot examples. This configuration approximated the routing approach available at Interhyp at the beginning of the project and therefore provided the relevant point of comparison for the optimization pipeline.
 
-The baseline Router correctly assigned 200 of the 240 evaluation queries, corresponding to 83\% accuracy, with an average latency of 669 ms. The aggregate result concealed a particularly severe class-level failure: when \texttt{PlatformSupportAgent} was the golden label, the Router did not select it for any query, resulting in an agent-level accuracy of 0\%. This illustrates why overall accuracy alone is insufficient in a multi-agent system. A Router can appear broadly functional while completely failing to recognize one specialist domain.
+The baseline Router correctly routed 200 of the 240 evaluation queries, corresponding to 83\% accuracy, with an average latency of 669 ms. The aggregate result concealed a particularly severe class-level failure: when \texttt{PlatformSupportAgent} was the golden label, the Router did not select it for any query, resulting in an agent-level accuracy of 0\%. Performance was also uneven beyond \texttt{PlatformSupportAgent}. \texttt{GeneralPurposeAgent} reached 83\% accuracy and was frequently confused with \texttt{PropertyReviewAgent}, while \texttt{OfferAgent} reached 87\% and was likewise often routed to \texttt{PropertyReviewAgent}. Because the baseline prompt supplied only broad descriptions and few examples, it did not define sufficiently clear boundaries between fallback queries, requests to review property documents, and requests to create an offer. The confusion matrix therefore suggests over-selection of \texttt{PropertyReviewAgent} rather than isolated random errors. These class-level disparities show why overall accuracy alone is insufficient in a multi-agent system: a Router can appear broadly functional while systematically failing or over-selecting individual agents.
 
 \begin{figure}[htbp]
 \centering
@@ -46,25 +32,19 @@ The 1,000 training queries and 240 evaluation queries remained disjoint througho
 
 The judge-labelled training runs were passed to the Optimization Dashboard, which applies the OPRO-based procedure described in \cref{sec:optimizer}. OPRO treats the Stage 2 system prompt as the optimization variable. In each round, the optimizer proposes candidate prompts based on the existing prompt trajectory, routing examples, and the judge's explanations of previous failures. Each candidate is installed temporarily, evaluated on training cases, and assigned a routing score. The strongest candidate is retained for the next round.
 
-After an optimization run, the resulting prompt was evaluated again through the Training Dashboard. The internal optimization objective reached 100\% by the second run, indicating rapid convergence on the cases available to the optimization process. This training result is not treated as the final result because it is computed on data available during optimization and can therefore be optimistic. Only the subsequent replay on the fixed 240-query evaluation dataset provides the held-out comparison with the 83\% baseline.
+After an optimization run, the resulting prompt was evaluated again through the Training Dashboard. The strongest prompt reached 99\% golden-label accuracy, correctly routing 994 of the 1,000 training queries, by the second optimization run. The rapid convergence can be explained by the deliberately simple starting prompt: its main agent-boundary weaknesses could be corrected in one major revision. With only six training queries still misrouted after the second run, little error signal remained for subsequent iterations. Because these queries were available during optimization, the 99\% training result may overstate generalization. The fixed 240-query evaluation set therefore provides the independent comparison with the 83\% baseline.
 
 \subsection{Divergence Between Judge Labels and Golden Labels}\label{sec:empirical-label-divergence}
 
 The synthetic training queries retained their predefined golden labels. This made it possible to evaluate the same Router decisions in two ways: first, by checking whether the selected agent matched the golden label, and second, by checking whether the judge preferred the selected agent's generated answer over the alternative answer. On the complete 1,000-query training run used in this final experiment, the strongest prompt achieved 99\% accuracy against the golden labels, while the judge-derived evaluation reported 94\% for the same configuration. This experiment is separate from the 548-case optimizer comparison reported in \cref{sec:optimizer-evaluation}.
 
-\begin{table}[htbp]
+\begin{figure}[htbp]
 \centering
-\caption{Accuracy of the strongest prompt under the two label sources (own illustration).}
-\label{tbl:empirical-label-comparison}
-\begin{tabular}{@{}lr@{}}
-\toprule
-Evaluation signal & Accuracy \\
-\midrule
-Golden agent labels & 99\% \\
-Judge verdicts & 94\% \\
-\bottomrule
-\end{tabular}
-\end{table}
+\includegraphics[width=1\linewidth,height=0.45\textheight,keepaspectratio,trim=0 480 0 0,clip]{assets/application/training-run.png}
+\caption{Training Dashboard for the 1,000-query run. The Router matched 994 golden labels (99\%), while judge agreement with ground truth was 94\%, with 58 judge-label mismatches.}
+\label{fig:empirical-label-comparison}
+\end{figure}
+\FloatBarrier
 
 The five-percentage-point gap does not necessarily mean that either measurement is internally inconsistent. The two signals measure related but non-identical targets. The golden label grades a closed-set classification decision: it asks whether the Router selected the agent assigned to the query when the dataset was created. The judge instead performs a pairwise assessment of generated answers. Its verdict therefore depends not only on the intended agent class, but also on the particular answers generated for that run and on which alternative the Router placed next in its ranking.
 
@@ -72,25 +52,35 @@ Three mechanisms can consequently produce disagreement:
 
 \begin{enumerate}
 \item \textbf{Ambiguous task boundaries.} Some synthetic queries plausibly fit more than one agent. The golden dataset must nevertheless assign one label, whereas two candidate agents may both return useful answers. The judge can prefer the alternative even when the Router selected the predefined golden agent.
-\item \textbf{Answer-generation variance.} A correct routing decision does not guarantee that the selected agent produces the better answer in every run. Conversely, an agent that does not match the golden class can occasionally generate a convincing response. The judge evaluates these concrete outputs rather than the routing decision in isolation.
+\item \textbf{Answer-generation variance.} The judge is intended to assess routing decisions, but it does so by comparing the answers produced by the selected agent and the strongest alternative. Variation in those answers can therefore make a correct route appear worse, or an incorrect route appear better, in a particular run.
 \item \textbf{Router-dependent candidate selection.} The judge compares the selected answer with a high-ranked alternative rather than independently classifying the query across all eight agents. If the correct agent is absent from the compared candidates, the judge cannot recover it. As the Router prompt changes, the candidate pairs presented to the judge change as well.
 \end{enumerate}
 
-Residual judge error and known LLM-judge biases may add further disagreement. However, the experiment does not support attributing the complete five-point difference to judge error alone. In particular, the judge's separately measured agreement with ground truth belongs to a different evaluation setup and should not be used to correct the 94\% value mechanically.
+Further disagreement could be caused by additional LLM-judge biases. However, the experiment does not support attributing the complete five-point difference to judge error alone. The judge's agreement with ground truth was measured in a separate experiment. It therefore cannot be used to adjust the 94\% result directly.
 
-Despite the difference in absolute values, judge-assessed accuracy tracked golden-label accuracy across the optimization runs: configurations with higher golden-label accuracy also received higher judge-assessed accuracy. The judge signal was therefore useful for ranking prompt candidates and steering optimization, even though it was not a calibrated estimate of absolute Router accuracy. The 94\%-rated prompt was the best-performing candidate according to the signal available to the optimization pipeline and was consequently selected for deployment.
+Despite the difference in absolute values, judge-assessed accuracy moved in the same direction as golden-label accuracy across the optimization runs. Configurations with higher golden-label accuracy also received higher judge-assessed accuracy. The judge signal was therefore useful for ranking prompt candidates and steering optimization, even though it did not reach perfect agreement with the ground-truth labels. The 94\%-rated prompt was the best-performing candidate according to the signal available to the optimization pipeline and was consequently selected for deployment.
 
-In a production environment, golden labels are unavailable for ordinary traffic, so the judge becomes the operational reference signal. If the same discrepancy occurred in production, monitoring would report 94\% even though a later human-labelled audit might estimate performance closer to 99\%. This example should not be interpreted as a stable five-point correction factor: without periodically sampled human labels, neither the direction nor the size of the gap can be assumed to remain constant. The practical implication is that judge-based monitoring can guide optimization, but it should be calibrated periodically against independently labelled production samples.
+In a production environment, golden labels are unavailable for ordinary traffic, so the judge becomes the operational reference signal. If the same discrepancy occurred in production, monitoring would report 94\% even though a later human-labelled audit might estimate performance closer to 99\%. This example should not be interpreted as a stable five-point correction factor: without periodically sampled human labels, neither the direction nor the size of the gap can be assumed to remain constant. The practical implication is that judge-based monitoring can guide optimization, but it should be calibrated periodically against independently labelled production samples, as Julian Kappler and Rainer Bomblies already recommended during the Sprint 3 review (\cref{sec:sprint3-review}).
 
 \subsection{Final Evaluation and Deployment}\label{sec:empirical-final}
 
-The selected prompt was saved as a new Stage 2 prompt version and deployed in the showcase application. Re-running the Stage 2-only configuration on the same fixed 240-query evaluation dataset produced 100\% routing accuracy, compared with 83\% for the original prompt. Because the dataset and routing stage remained unchanged, this 17-percentage-point improvement can be attributed to the optimized Stage 2 prompt within the experimental setting.
+The prompt selected in the first experiment was saved as a new Stage 2 prompt version and deployed in the showcase application. Re-running Stage 2 alone on the fixed 240-query evaluation set produced 100\% routing accuracy, compared with the 83\% baseline. Because the dataset and routing stage remained unchanged, this 17-percentage-point improvement can be attributed to the optimized Stage 2 prompt within the experimental setting. The final run then restored the complete two-stage pipeline: judge-confirmed examples from the separate 1,000-query training set were written to the Stage 1 example store, while Stage 2 reused the optimized prompt because it had already reached 100\% accuracy on the fixed evaluation set. This allowed the final experiment to measure how much Stage 1 could reduce LLM use while preserving the Stage 2 accuracy gain.
 
-The 100\% result refers specifically to the optimized Stage 2-only configuration. It must be distinguished from the final two-stage configuration, which reached 98\% while resolving 188 of the 240 queries through Stage 1. Stage 1 therefore covered 78\% of the dataset and avoided the corresponding Stage 2 LLM calls. Average latency decreased from 669 ms to 407 ms, a reduction of 262 ms or 39\%. The two-percentage-point reduction relative to the optimized Stage 2-only configuration was the accepted trade-off for the efficiency improvement. These configurations answer different empirical questions: the Stage 2-only comparison isolates the effect of prompt optimization, whereas the two-stage result evaluates the accuracy--efficiency trade-off of the complete Router.
+The resulting two-stage configuration reached 98\% accuracy while resolving 188 of the 240 queries through Stage 1. Stage 1 therefore covered 78\% of the dataset and avoided the corresponding Stage 2 LLM calls. Average latency decreased from 669 ms to 407 ms, a reduction of 262 ms or 39\%. This measured reduction is conservative relative to a production deployment because the prototype generated embeddings on the project's comparatively slow Python worker. Using a production-grade embedding provider would substantially reduce Stage 1 latency and therefore make the overall latency saving considerably larger. The two-percentage-point reduction relative to the optimized Stage 2-only configuration was the accepted trade-off for the efficiency improvement. These configurations answer different empirical questions: the Stage 2-only comparison isolates the effect of prompt optimization, whereas the two-stage result evaluates the accuracy--efficiency trade-off of the complete Router.
 
-\begin{table}[htbp]
+\begin{center}
 \centering
-\caption{Routing accuracy of the three evaluated configurations (own illustration).}
+\includegraphics[width=1\linewidth,height=0.78\textheight,keepaspectratio,trim=0 0 0 115,clip]{assets/evaluation/final-run-comparison.png}
+\captionof{figure}{Evaluation Dashboard comparison of the Stage 2-only baseline and the final two-stage Router. Accuracy increased from 83\% to 98\%, while Stage 1 resolved 78\% of queries and average latency decreased by 39\%.}
+\label{fig:empirical-final-comparison}
+\end{center}
+
+\Cref{fig:empirical-final-comparison} summarizes the final comparison: 235 of 240 queries were routed correctly, with five misroutes and 188 LLM calls avoided. Thus, judge feedback improved Stage 2 on synthetic data, while Stage 1 retained most accuracy gains at lower cost and latency. Independently labelled production data remains necessary.
+
+\Cref{tbl:empirical-results} consolidates the three evaluated configurations and distinguishes the effect of prompt optimization from the accuracy--efficiency trade-off of the complete Router.
+
+\begin{center}
+\captionof{table}{Summary of the three configurations evaluated in the empirical study (own illustration).}
 \label{tbl:empirical-results}
 \small
 \begin{tabular}{@{}p{0.27\linewidth}p{0.21\linewidth}rp{0.22\linewidth}@{}}
@@ -102,14 +92,4 @@ Optimized prompt & Stage 2 only & 100\% & Effect of prompt optimization \\
 Optimized full Router & Stage 1 and Stage 2 & 98\% & Accuracy--efficiency trade-off \\
 \bottomrule
 \end{tabular}
-\end{table}
-
-\begin{center}
-\centering
-\includegraphics[width=1\linewidth,height=0.78\textheight,keepaspectratio,trim=0 0 0 115,clip]{assets/evaluation/final-run-comparison.png}
-\captionof{figure}{Evaluation Dashboard comparison of the Stage 2-only baseline and the final two-stage Router. Accuracy increased from 83\% to 98\%, while Stage 1 resolved 78\% of queries and average latency decreased by 39\%.}
-\label{fig:empirical-final-comparison}
 \end{center}
-
-\enlargethispage{\baselineskip}
-\Cref{fig:empirical-final-comparison} summarizes the final comparison: 235 of 240 queries were routed correctly, with five misroutes and 188 LLM calls avoided. Thus, judge feedback improved Stage 2 on synthetic data, while Stage 1 retained most accuracy gains at lower cost and latency. Independently labelled production data remains necessary.

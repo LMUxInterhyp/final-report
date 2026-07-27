@@ -4,7 +4,7 @@ Sprint 2 ran from 12 to 25 May 2026, with the review and retrospective on 26 May
 
 \subsubsection{Sprint Goals}\label{sec:sprint2-goals}
 
-The goal was that the application routes queries to eight specialized agents, that traces are persisted to a database, that a first synthetic dataset exists, and that the judge and the optimizer are implemented and connected to the router. Each component either exists in the repository or does not, which made the goal measurable within the two-week sprint \autocite{schwaber2020scrum}.
+The goal was for the application to route queries to eight specialized agents, persist traces to a database, provide a first synthetic dataset, and deliver initial standalone implementations of the judge and optimizer. Each component either exists in the repository or does not, which made the goal measurable within the two-week sprint \autocite{schwaber2020scrum}.
 
 \subsubsection{Sprint Planning}\label{sec:sprint2-planning}
 
@@ -20,7 +20,7 @@ Seven tickets totaling 25 story points matched the velocity of Sprint 1: the age
 
 The eight-agent roster was defined, initially with a PropertyLawAgent in the eighth slot that was only later settled in favor of the PlatformSupportAgent (\cref{sec:agent-architecture}), and the first synthetic dataset was calibrated against an internal Interhyp frequency reference with its tail imbalance softened so that rare agents remain scorable (\cref{sec:dataset-stages}). Agent prompts were given a uniform five-part structure to sharpen the boundaries between overlapping agents.
 
-The router was built as the two-stage architecture it still uses, at this point on a smaller embedding model with a single global threshold. The judge was implemented as a panel of independent models \autocite{verga2024juries,li_llms-as-judges_2024}, later reduced to a single judge (\cref{sec:judge-bias}), and the optimizer MVP implemented OPRO \autocite{yang2023llmoptimizers} against a mocked judge so that both could be developed in parallel, still rewriting the judge prompt rather than the routing prompt it targets today (\cref{sec:optimizer}).
+The router was built as the two-stage architecture it still uses, at this point on a smaller embedding model with a single global threshold. The judge was implemented as a single-model evaluator. Subsequent evaluation exposed systematic problems that made it less reliable than the Router and motivated its redesign in Sprint 3 (\cref{sec:sprint3-execution}). The optimizer MVP implemented OPRO \autocite{yang2023llmoptimizers} against a mocked judge so that both components could be developed in parallel, still rewriting the judge prompt rather than the routing prompt it targets today (\cref{sec:optimizer}).
 
 \subsubsection{Sprint Review}\label{sec:sprint2-review}
 
