@@ -24,6 +24,8 @@ The most significant limitation is that the evaluation relied entirely on synthe
 
 A second limitation is that the self-improvement loop relies on a single judge. While the judge currently achieves 99\% agreement with the ground truth, this does not mean it is guaranteed to be error-free. The concern is structural: because every correction to the dispatcher comes from this one component, its mistakes have nowhere to be caught. Any error the judge makes would feed straight into the Stage 1 store and the optimizer and shape the dispatcher from there.
 
+The optimizer inherits related constraints. It depends entirely on the judge's verdict file as ground truth, so a systematic judge bias would misdirect the whole search rather than affect an isolated case, and a small or unevenly distributed verdict file risks fitting that file rather than producing a prompt that generalizes. The method itself, adopted from OPRO, is known to depend on the starting prompt and offers no guarantee that each round improves on the last \autocite{yang2023llmoptimizers}.
+
 Finally, the pipeline was evaluated on a limited range of models: local models served through Ollama, and Claude Haiku and Claude Sonnet through Bedrock. The behavior of the system may differ when using other providers, model families, or model sizes. Therefore, the findings are limited to the specific models and configurations evaluated in this project.
 
 \subsection{Potential Enhancements}\label{sec:enhancements}
