@@ -4,7 +4,7 @@ Before any pipeline component could be built, four questions had to be answered:
 
 \subsection{Scenario: PropDesk}\label{sec:propdesk-scenario}
 
-Interhyp could not give us access to their production chatbot or to the associated data. They provided the descriptions of their agents instead and suggested we replicate a structurally comparable setup in a different domain, an approach Rainer Bomblies proposed directly in our initial meetings with Interhyp. The scenario therefore had a few conditions from Interhyp. It had to be transferable back to Interhyp's system, and it had to reproduce a comparable degree of router complexity and agent overlap. A further condition was our own. Since in the beginning we did not yet know how many tokens we could get for free or pay for, it also had to remain difficult even if the agent roster were later reduced from eight to five in order to lower running costs.
+Interhyp could not give us access to their production chatbot or to the associated data. They provided the descriptions of their agents instead and suggested during our initial meetings that we replicate a structurally comparable setup in a different domain. The scenario therefore had a few conditions from Interhyp. It had to be transferable back to Interhyp's system, and it had to reproduce a comparable degree of router complexity and agent overlap. A further condition was our own. Since in the beginning we did not yet know how many tokens we could get for free or pay for, it also had to remain difficult even if the agent roster were later reduced from eight to five in order to lower running costs.
 
 Sorting Interhyp's own agents by function gave us the template to replicate (\cref{tbl:interhyp-agent-categories}).
 
@@ -103,7 +103,7 @@ Model capability was raised later where it actually mattered. Once the free AWS 
 
 \subsection{KPIs and Metrics}\label{sec:kpis}
 
-Following the advice Rainer Bomblies gave us in the Sprint 1 review meeting at Interhyp, we fixed our KPIs early, as a router cannot be measured by the final answer's quality. For our pipeline, we established three primary metrics: routing accuracy (correct routes), agent precision (correct when selected), and agent recall (selected when required). We also proposed tracking router latency and token cost per route. While this was a general concern for Interhyp, it was especially critical for our local models, as even a slight drop in efficiency led to significant delays when multiplied across hundreds of test calls.
+Following Interhyp's advice in the Sprint 1 review meeting, we fixed our KPIs early, as a router cannot be measured by the final answer's quality. For our pipeline, we established three primary metrics: routing accuracy (correct routes), agent precision (correct when selected), and agent recall (selected when required). We also proposed tracking router latency and token cost per route. While this was a general concern for Interhyp, it was especially critical for our local models, as even a slight drop in efficiency led to significant delays when multiplied across hundreds of test calls.
 
 For Interhyp's post-implementation phase, we proposed metrics requiring live user data: first-touch resolution and cost per successful outcome. We also proposed clarification rate, the rate at which the system asks for more details, but deliberately excluded it from our pipeline, so that the system would not be incentivized to constantly request clarification.
 
@@ -176,7 +176,7 @@ Difficulty was engineered rather than sampled. Following the behavioral testing 
 
 The constraint on the catalogue matters more than its contents. Every perturbation must be label-preserving: it may disguise the correct agent, but it may never change it. An item that a competent human applying the labeling rules cannot resolve is not a hard example, it is a specification defect, so a random sample was read manually and any batch containing such items was regenerated.
 
-The remaining risk is contamination. As Julian Kappler pointed out in one of our mid-sprint alignment meetings with Interhyp, seeding the router's Stage 1 vector index from the evaluation set would let the embedding model \enquote{succeed} on queries it had already seen and make the accuracy figure unusable. Stage 1 examples were therefore drawn from a separate part of the dataset, or from an earlier generation of it that had been retired from evaluation use, so that no prompt was ever both a seed example and a live evaluation item.
+The remaining risk is contamination. As Interhyp pointed out in one of our mid-sprint alignment meetings, seeding the router's Stage 1 vector index from the evaluation set would let the embedding model \enquote{succeed} on queries it had already seen and make the accuracy figure unusable. Stage 1 examples were therefore drawn from a separate part of the dataset, or from an earlier generation of it that had been retired from evaluation use, so that no prompt was ever both a seed example and a live evaluation item.
 
 \subsubsection{Limitations}\label{sec:dataset-limitations}
 
