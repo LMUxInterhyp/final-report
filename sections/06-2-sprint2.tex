@@ -8,7 +8,13 @@ The goal was that the application routes queries to eight specialized agents, th
 
 \subsubsection{Sprint Planning}\label{sec:sprint2-planning}
 
-Seven tickets totaling 25 story points matched the velocity of Sprint 1: the agents and their system prompts and the batch-evaluation wiring with Sebastian Straub, the synthetic dataset with Gáspár Harmati, the agent prompt design with Mohsin Saeed, the dispatcher and trace database with Julius Bethge, the judge with Marco Schröder, and the optimizer MVP with Gáspár Harmati and Mohsin Saeed jointly. Responding to Sprint 1 feedback, the team added a fixed in-person session on Tuesdays and kept two online stand-ups per week.
+Seven tickets totaling 25 story points matched the velocity of Sprint 1: the agents and their system prompts and the batch-evaluation wiring with Sebastian Straub, the synthetic dataset with Gáspár Harmati, the agent prompt design with Mohsin Saeed, the dispatcher and trace database with Julius Bethge, the judge with Marco Schröder, and the optimizer MVP with Gáspár Harmati and Mohsin Saeed jointly (\cref{fig:sprint2-backlog}). Responding to Sprint 1 feedback, the team added a fixed in-person session on Tuesdays and kept two online stand-ups per week.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.85\linewidth,height=\textheight,keepaspectratio]{assets/sprints/sprint2-backlog.png}
+\caption{Sprint 2 backlog in Jira showing owners, story-point estimates, and completion status.}\label{fig:sprint2-backlog}
+\end{figure}
 
 \subsubsection{Implementation and Execution}\label{sec:sprint2-execution}
 
@@ -30,4 +36,28 @@ All 25 story points were delivered, but the sprint showed the same late-finishin
 
 \subsubsection{Sprint Retrospective}\label{sec:sprint2-retrospective}
 
-The retrospective mapped sprint events by impact and frequency, revisited the two process concerns raised by the Sprint 1 reviewer, and closed with a Circle of Influence step separating what the team controls from what it can only influence. Two problems were confirmed. The gap between the Tuesday and Thursday meetings was too wide once the larger tickets became interdependent, so an optional Friday stand-up was trialed. The three five-point tickets each hid several sub-deliverables, so the team agreed to split anything above three points at planning and to add a mid-sprint refinement session, a rule that visibly shaped the Sprint 3 backlog (\cref{sec:sprint3-planning}). The overriding action was to integrate router, judge, and optimizer into a single end-to-end run.
+The retrospective ran in four phases on an adapted Miro template. The opening board placed sprint events on an impact and frequency grid (\cref{fig:sprint2-impact}). The in-person meeting at Interhyp scored as the highest-impact positive, while the missing literature basis for estimating complexity and recurring local model synchronization issues scored as the main friction points.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.85\linewidth,height=\textheight,keepaspectratio]{assets/sprints/sprint2-retrospective-impact.png}
+\caption{Sprint 2 retrospective opening board showing sprint events mapped by impact and frequency.}\label{fig:sprint2-impact}
+\end{figure}
+
+Two problems were then confirmed directly. The gap between the Tuesday and Thursday meetings was too wide once the larger tickets became interdependent, so an optional Friday stand-up was trialed. The three five-point tickets each hid several sub-deliverables, so the team agreed to split anything above three points at planning and to add a mid-sprint refinement session, a rule that visibly shaped the Sprint 3 backlog (\cref{sec:sprint3-planning}).
+
+The third phase asked the team to describe a perfect next sprint (\cref{fig:sprint2-perfect-iteration}). Integration dominated the board, with a working end-to-end loop and explicit interfaces between the modules named repeatedly, which is exactly what Sprint 3 went on to deliver.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.62\linewidth,height=\textheight,keepaspectratio]{assets/sprints/sprint2-retrospective-perfect-iteration.png}
+\caption{Sprint 2 retrospective Perfect Iteration board collecting the team's vision for the next sprint.}\label{fig:sprint2-perfect-iteration}
+\end{figure}
+
+A closing Circle of Influence sorted those outputs by how much control the team actually had over them (\cref{fig:sprint2-circle}). Running the optimization pipeline end-to-end, defining the module interfaces, logging every run, and starting a shared dashboard fell inside the team's direct control and became the action items; presentation cadence and team-wide documentation discipline sat in the outer band as things the team could only influence.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.6\linewidth,height=\textheight,keepaspectratio]{assets/sprints/sprint2-retrospective-circle.png}
+\caption{Sprint 2 retrospective Circle of Influence separating direct actions from items the team can only influence.}\label{fig:sprint2-circle}
+\end{figure}
