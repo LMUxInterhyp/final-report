@@ -1,4 +1,4 @@
-\subsection{Router}\label{sec:router}
+\authoredsubsection{Router}{Sebastian}{Sebastian Straub}\label{sec:router}
 
 The preceding sections introduced the eight specialist agents of the PropDesk scenario, each with its own instructions, domain knowledge, and, in production, its own tools and data access. The router assigns every incoming broker query to exactly one of these agents. Queries that fit no specialist domain fall by design to GeneralPurpose, keeping the problem a closed eight-class classification. Misclassification is expensive, since a misrouted specialist returns an answer useless to the advisor. The router must produce a score for each agent and select the highest, so the central design question is how these eight scores are computed. Candidate mechanisms range from asking a model to state its own confidence to measuring semantic similarity, and they differ considerably along the success criteria the project scope fixed before the first sprint, namely accuracy, latency, and cost (see \cref{sec:introduction}). A mechanism that maximizes one dimension while ignoring the other two was ruled out.
 

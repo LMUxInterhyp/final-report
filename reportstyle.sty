@@ -84,11 +84,30 @@
 
 \pagestyle{fancy}
 \fancyhf{}
+\newmarks\reportauthormarks
+\newcommand{\reportauthor}[1]{\marks\reportauthormarks{#1}}
+\newcommand{\clearreportauthor}{\reportauthor{}}
+\newcommand{\sectionauthorlabel}[1]{%
+  {\fontsize{10.5}{13}\selectfont (#1)}%
+}
+\newcommand{\subsectionauthorlabel}[1]{%
+  {\fontsize{9.5}{12}\selectfont (#1)}%
+}
+\newcommand{\authoredsection}[3]{%
+  \reportauthor{#3}%
+  \section{\texorpdfstring{#1\space\sectionauthorlabel{#2}}{#1 (#2)}}%
+}
+\newcommand{\authoredsubsection}[3]{%
+  \reportauthor{#3}%
+  \subsection{\texorpdfstring{#1\space\subsectionauthorlabel{#2}}{#1 (#2)}}%
+}
 \fancyfoot[R]{\thepage}
+\fancyfoot[L]{\footnotesize\color{black!45}\firstmarks\reportauthormarks}
 \renewcommand{\headrulewidth}{0pt}
 \renewcommand{\footrulewidth}{0pt}
 \fancypagestyle{plain}{%
   \fancyhf{}
+  \fancyfoot[L]{\footnotesize\color{black!45}\firstmarks\reportauthormarks}
   \fancyfoot[R]{\thepage}
   \renewcommand{\headrulewidth}{0pt}
   \renewcommand{\footrulewidth}{0pt}
