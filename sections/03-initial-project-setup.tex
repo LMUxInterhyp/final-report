@@ -1,13 +1,195 @@
 \authoredsection{Initial Project Setup}{Gáspár}{Gáspár Harmati}\label{sec:initial-project-setup}
 
-\subsection{Golden Dataset}\label{sec:golden-dataset}
-\pendingcontent{Gáspár Harmati}{Insert the finalized description of the golden and synthetic datasets, including construction, class distribution, difficulty levels, train/evaluation separation, and relevant figures or tables.}
+Before any pipeline component could be built, four questions had to be answered: what our optimization scenario is, which models we could run, how routing quality would be measured, and where the labels to measure it against would come from. None of these were downstream implementation details. Each of them constrained the architecture that follows in \cref{sec:evaluation-pipeline}.
 
-\subsection{PropDesk Scenario}\label{sec:propdesk-scenario}
-\pendingcontent{Gáspár Harmati}{Insert the finalized PropDesk scenario and the definitions of the eight specialist agents used throughout the report.}
+\subsection{Scenario: PropDesk}\label{sec:propdesk-scenario}
 
-\subsection{Key Performance Indicators}\label{sec:kpis}
-\pendingcontent{Gáspár Harmati}{Insert the finalized KPI definitions and explain how accuracy, latency, and cost are measured and interpreted.}
+Interhyp could not give us access to their production chatbot or to the associated data. They provided the descriptions of their agents instead and suggested we replicate a structurally comparable setup in a different domain, an approach Rainer proposed directly during the initial meetings \autocite{interhyp-meetings}. The scenario therefore had a few conditions from Interhyp. It had to be transferable back to Interhyp's system, and it had to reproduce a comparable degree of router complexity and agent overlap. A further condition was our own. Since in the beginning we did not yet know how many tokens we could get for free or pay for, it also had to remain difficult even if the agent roster were later reduced from eight to five in order to lower running costs.
+
+Sorting Interhyp's own agents by function gave us the template to replicate (\cref{tbl:interhyp-agent-categories}).
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.2600}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.6900}}@{}}
+\caption{Interhyp's production agents sorted by function, the template PropDesk replicates (own illustration).}\label{tbl:interhyp-agent-categories}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Category
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Interhyp agents
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Category
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Interhyp agents
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Fallback & GeneralPurposeAgent \\
+Document generation & EmailAgent, UebergabeprotokollAgent, VoranfrageAgent \\
+Review / QA & AktenpruefungAgent, CoachAgent \\
+Knowledge retrieval & ProviderinfosAgent, HomeSupportAgent \\
+\end{longtable}
+
+We decided to mirror this structure to make lessons learned as transferable as possible. PropDesk is our translation of that structure into real estate brokerage: an internal assistant for brokers who use it for daily operational work, drafting documents, retrieving market or legal information, reviewing property files, and running coaching sessions. The domain is different, the routing problem is not. A broker asking for an email to a seller and an Interhyp advisor asking for an email to a client pose the router the same question, and the overlaps that make routing hard, three agents that all produce written documents and two agents that both perform reviews, are preserved one-to-one.
+
+\subsection{Agent Architecture}\label{sec:agent-architecture}
+
+Eight agents were defined, seven of them fixed by the analogy to Interhyp and the eighth settled together with Interhyp between two candidates (\cref{tbl:propdesk-agents}).
+
+\begingroup\footnotesize
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2800}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1400}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2100}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1200}}@{}}
+\caption{The eight PropDesk agents, their Interhyp analogy, and their specified traffic share (own illustration).}\label{tbl:propdesk-agents}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Agent
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Interhyp analogy
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Category
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Trigger
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Frequency
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Agent
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Interhyp analogy
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Category
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Trigger
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Frequency
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+EmailAgent & EmailAgent & Document generation & Explicit request for an email & 50\% \\
+GeneralPurposeAgent & GeneralPurposeAgent & Fallback & No other agent fits exactly & 20\% \\
+MarketInfoAgent & ProviderinfosAgent & Knowledge retrieval & General market or pricing questions & 10\% \\
+OfferAgent & VoranfrageAgent & Document generation & Explicit request for a purchase offer & 7\% \\
+ExposeAgent & UebergabeprotokollAgent & Document generation & Explicit request for a property exposé & 5\% \\
+PropertyReviewAgent & AktenpruefungAgent & Review / QA & Explicit document review, four-eyes check & 3\% \\
+PlatformSupportAgent & HomeSupportAgent & Knowledge retrieval & Questions about PropDesk platform usage & 3\% \\
+CoachAgent & CoachAgent & Review / QA & Explicit request for a new coaching session & 2\% \\
+\end{longtable}
+\endgroup
+
+The frequencies above are a deliberately flattened version of Interhyp's own traffic, where half the agents were called in under one percent of cases. A route that is almost never exercised cannot be measured, however faithfully it is reproduced. One of the later test sets was generated with an equal split across the target agents, for the per-agent measurement reasons set out in \cref{sec:dataset-stages}.
+
+The eighth slot was a decision made together with Interhyp between two proposed options rather than a translation. Option A fills it with the PlatformSupportAgent, which mirrors Interhyp's HomeSupportAgent and preserves the analogy in full, but adds little routing difficulty, since PropDesk platform questions are close to unambiguous. Option B replaces it with a PropertyLawAgent covering disclosure obligations, purchase contract law, land register procedures, and notarization requirements, which would have created a three-way conflict between MarketInfo, PropertyLaw, and GeneralPurpose that no merge strategy resolves, but at the cost of departing from the architecture we were meant to be replicating. We settled on Option A with Interhyp. Option B's advantage was that it maintained the difficulty in the event of a five-agent reduction that was never actually performed, while Option A's fidelity applies to every result the project reports.
 
 \subsection{Local Model Setup}\label{sec:local-models}
-\pendingcontent{Gáspár Harmati}{Insert the finalized local-model setup, model-selection rationale, and the boundary between local and hosted inference.}
+
+Neither the university nor Interhyp could provide a token budget, so any hosted capacity had to be paid for by the team itself. We learned this during Sprint 1, added SCRUM-22 mid-sprint to resolve it, and settled on running local models through Ollama, using Gemma 4 at whatever size each team member's machine could handle, with OpenRouter as the path for cloud deployments and a privately purchased token budget for the first tests of the optimizer, where the local model proved to be too slow.
+
+The trade-off was that local models are weaker than production-grade hosted ones and results obtained on them do not automatically transfer, which is a threat to the external validity of everything we measured. What made the constraint tolerable is that our optimization target is a routing decision rather than a generated answer, and routing degrades more gracefully than generation when model capability drops, especially since Interhyp themselves use a smaller model for routing. It also turned out that the constraint had an upside we did not plan for. Ollama exposes token log probabilities, which is what Stage 2 of the router reads to produce a scored distribution over the eight agents instead of a single label (\cref{sec:router-stage2}), and that signal remained useful enough that the production configuration still routes Stage 2 through a local model even after AWS Bedrock became available for the judge and the optimizer.
+
+Model capability was raised later where it actually mattered. Once the free AWS credits were confirmed in Sprint 3, the judge and the optimizer, the two components where a weak model directly corrupts the feedback signal, moved to hosted models, while the router and the agents stayed local. The reasoning is described in \cref{sec:judge,sec:optimizer}.
+
+\subsection{KPIs and Metrics}\label{sec:kpis}
+
+Following Rainer's advice in Sprint 1 \autocite{interhyp-meetings}, we fixed our KPIs early, as a router cannot be measured by the final answer's quality. For our pipeline, we established three primary metrics: routing accuracy (correct routes), agent precision (correct when selected), and agent recall (selected when required). We also proposed tracking router latency and token cost per route. While this was a general concern for Interhyp, it was especially critical for our local models, as even a slight drop in efficiency led to significant delays when multiplied across hundreds of test calls.
+
+For Interhyp's post-implementation phase, we proposed metrics requiring live user data: first-touch resolution and cost per successful outcome. We also proposed clarification rate, the rate at which the system asks for more details, but deliberately excluded it from our pipeline, so that the system would not be incentivized to constantly request clarification.
+
+\subsection{The Golden Dataset}\label{sec:golden-dataset}
+
+\subsubsection{What Was Generated, and Why the Distinction Matters}\label{sec:dataset-scope}
+
+Our synthetic data generation produces only the input side: a broker utterance paired with a categorical routing label, formally (prompt\_text, correct\_agent). No agent response is generated. This creates a single-label classification evaluation set.
+
+Generation is LLM-driven and specification-conditioned, the standard setting, in which the instruction-following capability of the model allows controllability over the process and the production of datasets tailored to a specific application \autocite{long2024syntheticdata}.
+
+\subsubsection{Four Stages, Four Different Questions}\label{sec:dataset-stages}
+
+The data was not produced in one pass, and the design objective changed deliberately between passes as the router improved (\cref{tbl:dataset-stages}). This progression is the part of the dataset work that carried the most design intent.
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.0700}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.0700}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2200}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2300}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.3600}}@{}}
+\caption{The four generation stages of the golden dataset and the question each was built to answer (own illustration).}\label{tbl:dataset-stages}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Stage
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+n
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Distribution
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Difficulty
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Question it answers
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Stage
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+n
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Distribution
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Difficulty
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Question it answers
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+1 & 100 & Skewed, specification frequencies & Full range, realistic & How will it behave in production, and where does it fail? \\
+2 & 200 & Skew decreased from specifications & All high & Do hard prompts expose more failures, including on the rarer agents? \\
+3 & 1,000 & Equal across all eight agents & Maximum adversarial & How competent is it on every route, at the boundary? \\
+4 & 2,000 & Skew decreased from specifications & Full range, high and maximum overrepresented & Do our observations scale? \\
+\end{longtable}
+
+Stage 1 aimed to mirror production: specification frequencies rather than a balanced set, difficulty spread across the full range rather than fixed at the hard end, because real broker traffic is mostly easy with a few awkward outliers mixed in. The intent was estimation, not diagnosis: an estimate of deployment behavior and, more usefully, a map of where the router fails rather than a single number for how often.
+
+Once the router learns the easy majority in a realistic data mix, additional easy samples provide almost no new learning signal. High aggregate scores mask the fact that rare, critical boundary cases remain unoptimized due to their low frequency in the dataset. Stage 2 resolved this by generating exclusively high-difficulty items for all agents equally, ensuring we had enough ambiguous examples for less frequently called agents.
+
+Stage 3 gave up on realism altogether and split all eight agents equally at maximum difficulty, giving every agent the same weight and the most ambitious prompts.
+
+Stage 4 served as a 2,000-item sanity check to verify whether Stage 3's results generalized. It reintroduced a slight class skew and less complex prompts, while still including all of the complex ones.
+
+\subsubsection{Difficulty Engineering}\label{sec:dataset-difficulty}
+
+To systematically evaluate the routing accuracy of our agentic pipeline beyond standard aggregate metrics, we adopted the behavioral testing methodology introduced by \textcite{ribeiro2020checklist}, engineering our synthetic data to validate specific linguistic capabilities through targeted input perturbations.
+
+Difficulty was introduced through nine controlled corruption mechanisms applied to the prompt surface: an ambiguous or buried trigger, typographical errors (\enquote{drativ an emial}, \enquote{fourr-eyes chekc}), non-native grammar, a difficult synonym for the trigger (\enquote{knock together a few lines to the vendor}), a long incoherent multi-topic text with the real ask embedded in it, pasted-in irrelevant content such as signature blocks or forwarded threads, a lexical trap seeding a competing agent's keyword, domain-term camouflage dressing a legal question in market vocabulary, and code-switching into German terminology (Grundbuch, Teilungserklärung, MaBV).
+
+Every corruption mechanism must be label-preserving. Corruption may disguise the correct agent, but it may never change it. An item that a competent human applying the labeling rules cannot resolve is not a hard example, it is a specification defect. A random sample of the generated prompts was therefore checked manually, and where such examples were found the whole sample was regenerated with those items included as negative examples.
+
+\subsubsection{Label Integrity, Serialization, and Contamination}\label{sec:dataset-integrity}
+
+Label integrity was governed by predefined scopes, boundary tiebreakers, and explicit rules for handling ambiguous items, described in \cref{sec:dataset-difficulty}, including few-shot examples.
+
+To accommodate evolving input requirements as the project progressed, the generation pipeline was adapted to produce both CSV and JSON files.
+
+Contamination was treated as critically as label accuracy. As Julian identified during a mid-sprint alignment \autocite{interhyp-meetings}, drawing the examples that seed the router's Stage 1 vector index from the evaluation set would result in the embedding model \enquote{successfully} routing queries it had already seen, rendering the accuracy metric unusable. Consequently, router Stage 1 examples were sourced from a separate part of the dataset, or were maintained from an earlier generation of the golden dataset that had been retired from evaluation use, so that no prompt was ever both a seed example and a live evaluation item.
+
+\subsubsection{Limitations}\label{sec:dataset-limitations}
+
+It is important to emphasize that synthetic data generation was never the primary deliverable of our task, and we deliberately spent less effort on it than on the router, the judge, and the optimizer. Our goal was never to perfectly replicate Interhyp's exact production metrics. Interhyp already has access to their own prompts, so attempting to synthetically recreate freely available data offers them no real value. Instead, we simply needed a functional dataset for pipeline optimization. Because these are straightforward text prompts, a manual read of a sample was enough to confirm that each prompt is something a broker could plausibly write and that its label is correct, which is what our optimization needed.
+
+Since the generated prompts are deliberately harder than plausible production traffic, the accuracy figures from Stages 2 to 4 act as a diagnostic stress test rather than a production estimate, while only Stage 1 was built to approximate deployment behavior.

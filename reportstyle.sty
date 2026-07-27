@@ -43,6 +43,11 @@
   isbn=false
 ]{biblatex}
 
+% Entries exported from Zotero carry a full ISO date, which authoryear would
+% print as "Dec. 27, 2024" next to the year-only entries maintained by hand.
+% Drop month and day at print time so the imported data stays untouched.
+\AtEveryBibitem{\clearfield{month}\clearfield{day}}
+
 \onehalfspacing
 \justifying
 \setlength{\parindent}{0pt}
