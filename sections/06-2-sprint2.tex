@@ -4,7 +4,7 @@ Sprint 2 ran from 12 to 25 May 2026, with the review and retrospective on 26 May
 
 \subsubsection{Sprint Goals}\label{sec:sprint2-goals}
 
-The goal was for the application to route queries to eight specialized agents, persist traces to a database, provide a first synthetic dataset, and deliver initial standalone implementations of the judge and optimizer. Each component either exists in the repository or does not, which made the goal measurable within the two-week sprint \autocite{schwaber2020scrum}.
+The goal was that the application routes queries to eight specialized agents, that traces are saved to a database, that a first synthetic dataset exists, and that the judge and the optimizer are implemented and connected to the router. Each component either exists in the repository or does not, which made the goal measurable within the two-week sprint \autocite{schwaber2020scrum}.
 
 \subsubsection{Sprint Planning}\label{sec:sprint2-planning}
 
@@ -12,39 +12,39 @@ Seven tickets totaling 25 story points matched the velocity of Sprint 1: the age
 
 \begin{figure}
 \centering
-\includegraphics[width=0.85\linewidth,height=\textheight,keepaspectratio]{assets/sprints/sprint2-backlog.png}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{assets/sprints/sprint2-backlog.png}
 \caption{Sprint 2 backlog in Jira showing owners, story-point estimates, and completion status.}\label{fig:sprint2-backlog}
 \end{figure}
 
 \subsubsection{Implementation and Execution}\label{sec:sprint2-execution}
 
-The eight-agent roster was defined, initially with a PropertyLawAgent in the eighth slot that was only later settled in favor of the PlatformSupportAgent (\cref{sec:agent-architecture}), and the first synthetic dataset was calibrated against an internal Interhyp frequency reference with its tail imbalance softened so that rare agents remain scorable (\cref{sec:dataset-stages}). Agent prompts were given a uniform five-part structure to sharpen the boundaries between overlapping agents.
+The eight-agent roster was defined and validated with Interhyp (\cref{sec:agent-architecture}), and the first iterations of the synthetic dataset were created with the internal Interhyp reference in mind (\cref{sec:dataset-stages}).
 
-The router was built as the two-stage architecture it still uses, at this point on a smaller embedding model with a single global threshold. The judge was implemented as a single-model evaluator. Subsequent evaluation exposed systematic problems that made it less reliable than the Router and motivated its redesign in Sprint 3 (\cref{sec:sprint3-execution}). The optimizer MVP implemented OPRO \autocite{yang2023llmoptimizers} against a mocked judge so that both components could be developed in parallel, still rewriting the judge prompt rather than the routing prompt it targets today (\cref{sec:optimizer}).
+The router was built as the two-stage architecture it still uses, at this point on a smaller embedding model with a single global threshold (\cref{sec:router}). The judge was implemented as a panel of independent models, later reduced to a single judge (\cref{sec:judge-bias}), and the optimizer MVP implemented OPRO utocite{yang2023llmoptimizers} against a mocked judge so that both could be developed in parallel (\cref{sec:optimizer}).
 
 \subsubsection{Sprint Review}\label{sec:sprint2-review}
 
-At the review on 26 May, Interhyp confirmed that the domain analogy and the dataset calibration matched its setup closely enough and asked for a dashboard presenting routing accuracy against the secondary KPIs as a single accuracy-performance frontier. Interhyp also cautioned against scope creep, arguing that a smaller set of components finished with measurable results was worth more than a larger partially working system.
+At the review on 26 May, Interhyp confirmed that the domain analogy and the dataset calibration matched its setup closely enough and asked for a dashboard presenting routing accuracy against the secondary KPIs as a single accuracy-performance frontier. They also cautioned against scope creep, arguing that a smaller set of components finished with measurable results was worth more than a larger partially working system.
 
-All 25 story points were delivered, but the burnup chart shows the same late-finishing pattern as Sprint 1 (\cref{fig:sprint2-burndown}), with the three five-point tickets closing in the final days.
+All 25 story points were delivered, with the components reviewed by the team closing the tickets in the final days, hence the last-day increase in the burn-up chart (\cref{fig:sprint2-burnup}).
 
 \begin{figure}
 \centering
-\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{assets/sprints/sprint2-burndown.png}
-\caption{Sprint 2 burnup chart.}\label{fig:sprint2-burndown}
+\includegraphics[width=0.9\linewidth,height=\textheight,keepaspectratio]{assets/sprints/sprint2-burndown.png}
+\caption{Sprint 2 burn-up chart showing completed story points against the ideal rate.}\label{fig:sprint2-burnup}
 \end{figure}
 
 \subsubsection{Sprint Retrospective}\label{sec:sprint2-retrospective}
 
-The retrospective ran in four phases on an adapted Miro template. The opening board placed sprint events on an impact and frequency grid (\cref{fig:sprint2-impact}). The in-person meeting at Interhyp scored as the highest-impact positive, while the missing literature basis for estimating complexity and recurring local model synchronization issues scored as the main friction points.
+The retrospective ran in four phases on a Miro template from \textcite{teotti2025retrospective}, adapted to the project by Gáspár Harmati. The opening board placed sprint events on an impact and frequency grid (\cref{fig:sprint2-impact}). The in-person meeting at Interhyp scored as the highest-impact positive, while the missing literature basis for estimating complexity and recurring local model synchronization issues scored as the main friction points.
 
 \begin{figure}
 \centering
-\includegraphics[width=0.85\linewidth,height=\textheight,keepaspectratio]{assets/sprints/sprint2-retrospective-impact.png}
+\includegraphics[width=0.9\linewidth,height=\textheight,keepaspectratio]{assets/sprints/sprint2-retrospective-impact.png}
 \caption{Sprint 2 retrospective opening board showing sprint events mapped by impact and frequency.}\label{fig:sprint2-impact}
 \end{figure}
 
-Two problems were then confirmed directly. The gap between the Tuesday and Thursday meetings was too wide once the larger tickets became interdependent, so an optional Friday stand-up was trialed. The three five-point tickets each hid several sub-deliverables, so the team agreed to split anything above three points at planning and to add a mid-sprint refinement session, a rule that visibly shaped the Sprint 3 backlog (\cref{sec:sprint3-planning}).
+Two problems were then confirmed directly. The gap between the Tuesday and Thursday meetings was too wide once the larger tickets became interdependent, so an optional Friday stand-up was trialed. The three five-point tickets each hid several sub-deliverables, so the team agreed to split anything above three points at planning and to add a mid-sprint refinement session.
 
 The third phase asked the team to describe a perfect next sprint (\cref{fig:sprint2-perfect-iteration}). Integration dominated the board, with a working end-to-end loop and explicit interfaces between the modules named repeatedly, which is exactly what Sprint 3 went on to deliver.
 
