@@ -16,7 +16,7 @@ The baseline Router correctly routed 200 of the 240 evaluation queries, correspo
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=1\linewidth,height=0.78\textheight,keepaspectratio,trim=0 0 0 115,clip]{assets/evaluation/baseline-stage2.png}
-\caption{Baseline Evaluation Dashboard for the original Stage 2-only configuration. The Router correctly classified 200 of 240 queries, while \protect\texttt{PlatformSupportAgent} reached 0\% accuracy.}
+\caption{Baseline Evaluation Dashboard for the original Stage 2-only configuration. The Router correctly classified 200 of 240 queries, while \protect\texttt{PlatformSupportAgent} reached 0\% accuracy (Chatbot application).}
 \label{fig:empirical-baseline}
 \end{figure}
 
@@ -49,7 +49,7 @@ The synthetic training queries retained their predefined golden labels. This mad
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=1\linewidth,height=0.45\textheight,keepaspectratio,trim=0 480 0 0,clip]{assets/application/training-run.png}
-\caption{Training Dashboard for the 1,000-query run. The Router matched 994 golden labels (99\%), while judge agreement with ground truth was 94\%, with 58 judge-label mismatches.}
+\caption{Training Dashboard for the 1,000-query run. The Router matched 994 golden labels (99\%), while judge agreement with ground truth was 94\%, with 58 judge-label mismatches (Chatbot application).}
 \label{fig:empirical-label-comparison}
 \end{figure}
 \FloatBarrier
@@ -79,7 +79,7 @@ The resulting two-stage configuration reached 98\% accuracy while resolving 188 
 \begin{center}
 \centering
 \includegraphics[width=1\linewidth,height=0.78\textheight,keepaspectratio,trim=0 0 0 115,clip]{assets/evaluation/final-run-comparison.png}
-\captionof{figure}{Evaluation Dashboard comparison of the Stage 2-only baseline and the final two-stage Router. Accuracy increased from 83\% to 98\%, while Stage 1 resolved 78\% of queries and average latency decreased by 39\%.}
+\captionof{figure}{Evaluation Dashboard comparison of the Stage 2-only baseline and the final two-stage Router. Accuracy increased from 83\% to 98\%, while Stage 1 resolved 78\% of queries and average latency decreased by 39\% (Chatbot application).}
 \label{fig:empirical-final-comparison}
 \end{center}
 

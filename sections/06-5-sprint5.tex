@@ -15,7 +15,7 @@ Planning started from two gaps left open after Sprint 4. The optimizer's executi
 \begin{figure}
 \centering
 \includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{assets/sprints/sprint5-backlog.png}
-\caption{Sprint 5 backlog in Jira showing owners and completion status.}\label{fig:sprint5-backlog}
+\caption{Sprint 5 backlog showing owners and completion status (Jira).}\label{fig:sprint5-backlog}
 \end{figure}
 
 \subsubsection{Implementation and Execution}\label{sec:sprint5-execution}
@@ -33,7 +33,7 @@ Deployment made PropDesk available at a public URL, with sign-in through Google 
 \begin{figure}[p]
 \centering
 \includegraphics[width=0.95\linewidth,height=0.88\textheight,keepaspectratio]{assets/sprints/sprint5-deployment-architecture.png}
-\caption{PropDesk deployment architecture across the identity, frontend, backend, and worker layers.}\label{fig:sprint5-architecture}
+\caption{PropDesk deployment architecture across the identity, frontend, backend, and worker layers (own illustration).}\label{fig:sprint5-architecture}
 \end{figure}
 
 A final revision concerned the Stage 1 decision rule. The per-agent margin thresholds from Sprint 3 (\cref{sec:sprint3-execution}) decided escalation on the raw distance between the best and second-best agent score. This worked, but a margin is not comparable across agents and cannot be read as a probability, which made the threshold dashboard hard to interpret and the operating point hard to communicate to Interhyp. Stage 1 was therefore reworked onto a temperature-scaled softmax over the per-agent scores, with the thresholds refitted on the resulting top-agent probability \autocite{guo2017}. Temperature scaling is monotone and cannot alter the agent ranking, so the change affected only the abstention decision. The coverage and risk figures in \cref{sec:router-stage1} are those of the recalibrated configuration and supersede the Sprint 3 values.
@@ -49,7 +49,7 @@ The burndown chart of this sprint requires interpretation (\cref{fig:sprint5-bur
 \begin{figure}
 \centering
 \includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{assets/sprints/sprint5-burndown.png}
-\caption{Sprint 5 burnup chart.}\label{fig:sprint5-burndown}
+\caption{Sprint 5 burnup chart (Jira).}\label{fig:sprint5-burndown}
 \end{figure}
 
 \subsubsection{Final Retrospective}\label{sec:sprint5-retrospective}
@@ -59,5 +59,5 @@ Since no next sprint remained to derive action items for, the team replaced the 
 \begin{figure}
 \centering
 \includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{assets/sprints/sprint5-retrospective.png}
-\caption{Final project retrospective board in Miro.}\label{fig:sprint5-retrospective}
+\caption{Final project retrospective board (Miro).}\label{fig:sprint5-retrospective}
 \end{figure}

@@ -19,7 +19,7 @@ The architecture consists of a React frontend, Convex backend, and Python worker
 \begin{figure}
 \centering
 \pandocbounded{\includegraphics[keepaspectratio]{assets/application/architecture.png}}
-\caption{Technical stack connecting the React frontend, Convex state layer, Python pipeline worker, and model providers.}
+\caption{Technical stack connecting the React frontend, Convex state layer, Python pipeline worker, and model providers (own illustration).}
 \label{fig:application-architecture}
 \end{figure}
 
@@ -68,7 +68,7 @@ Interactions are intentionally single-turn, limiting conversational state as a c
 \begin{figure}
 \centering
 \pandocbounded{\includegraphics[keepaspectratio]{assets/application/chatbot-interface.png}}
-\caption{Completed chatbot interaction with routing scores, trace history, and judge summary.}
+\caption{Completed chatbot interaction with routing scores, trace history, and judge summary (Chatbot application).}
 \label{fig:chatbot-interface}
 \end{figure}
 
@@ -79,7 +79,7 @@ The pipeline view presents Router and judge execution as connected graphs. Nodes
 \begin{figure}
 \centering
 \pandocbounded{\includegraphics[keepaspectratio]{assets/application/router-pipeline.png}}
-\caption{Router pipeline with the successful Stage 1 route and node inspector.}
+\caption{Router pipeline with the successful Stage 1 route and node inspector (Chatbot application).}
 \label{fig:application-router-pipeline}
 \end{figure}
 
@@ -90,7 +90,7 @@ Conditional branches remain visible even when they are not executed, with their 
 \begin{figure}
 \centering
 \pandocbounded{\includegraphics[keepaspectratio]{assets/application/judge-pipeline.png}}
-\caption{Judge pipeline with the response-comparison step selected in the node inspector.}
+\caption{Judge pipeline with the response-comparison step selected in the node inspector (Chatbot application).}
 \label{fig:application-judge-pipeline}
 \end{figure}
 
@@ -101,7 +101,7 @@ The evaluation view runs a selected prompt version against the fixed evaluation 
 \begin{figure}
 \centering
 \pandocbounded{\includegraphics[keepaspectratio]{assets/application/evaluation-run.png}}
-\caption{Completed evaluation run with routing, latency, and per-agent results.}
+\caption{Completed evaluation run with routing, latency, and per-agent results (Chatbot application).}
 \label{fig:application-evaluation}
 \end{figure}
 
@@ -110,7 +110,7 @@ Training remains separate. Users upload labelled examples, and the application v
 \begin{figure}
 \centering
 \pandocbounded{\includegraphics[keepaspectratio]{assets/application/training-run.png}}
-\caption{Completed training run with routing, judge, cost, and trace-level results.}
+\caption{Completed training run with routing, judge, cost, and trace-level results (Chatbot application).}
 \label{fig:application-training}
 \end{figure}
 
@@ -119,7 +119,7 @@ The optimization view applies OPRO to completed training data. Users follow roun
 \begin{figure}
 \centering
 \pandocbounded{\includegraphics[keepaspectratio]{assets/application/optimization-run.png}}
-\caption{Optimization trajectory showing the seed, candidate scores, and best fixed-evaluation result.}
+\caption{Optimization trajectory showing the seed, candidate scores, and best fixed-evaluation result (Chatbot application).}
 \label{fig:application-optimization}
 \end{figure}
 
