@@ -13,7 +13,7 @@ The direction had been set at the Sprint 3 review, where Interhyp's product owne
 \begin{figure}
 \centering
 \includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{assets/sprints/sprint4-backlog.jpg}
-\caption{Sprint 4 backlog in Jira, showing the seven tickets and their story-point weights.}\label{fig:sprint4-backlog}
+\caption{Sprint 4 backlog in Jira showing the seven tickets and their story-point estimates.}\label{fig:sprint4-backlog}
 \end{figure}
 
 \subsubsection{Implementation and Execution}\label{sec:sprint4-implementation}
@@ -29,13 +29,13 @@ In parallel, the team also built the pipeline visualization dashboard in React o
 \begin{figure}
 \centering
 \includegraphics[width=0.7\linewidth,height=\textheight,keepaspectratio]{assets/sprints/sprint4-chat-view.png}
-\caption{Chat view showing the routed agent, the Stage 1 routing decision, and the per-agent confidence scores.}\label{fig:sprint4-chat-view}
+\caption{Sprint 4 chat view showing the selected agent, Stage 1 routing decision, and per-agent confidence scores.}\label{fig:sprint4-chat-view}
 \end{figure}
 
 \begin{figure}
 \centering
 \includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{assets/sprints/sprint4-router-pipeline.png}
-\caption{Router pipeline diagram, with the highlighted path showing a query routed directly by Stage 1 and Stage 2 left skipped.}\label{fig:sprint4-router-pipeline}
+\caption{Sprint 4 router pipeline showing a query resolved by Stage 1 with Stage 2 skipped.}\label{fig:sprint4-router-pipeline}
 \end{figure}
 
 The remaining architectural decision was the choice of optimizer. On a shared 548-example set covering all eight agents, DSPy MIPROv2 improved Stage 2 accuracy from 95.45 to 96.59 percent, a gain of 1.14 points, but only once the dataset was large enough to expose a consistent signal. On the same data OPRO improved accuracy from 95.0 to 98.6 percent, a gain of 3.6 points, in six rounds. The difference lies in the optimization strategy: rather than searching statistically over a validation set, OPRO grounds its meta-prompt in judge-confirmed routing failures, refining the prompt from explicit failure cases instead of requiring broad coverage of the task distribution \autocite{yang2023llmoptimizers}. The team selected OPRO and aligned the decision with Julian and Rainer on 16 June. To measure improvement without bias, Gáspár then built a deliberately difficult ground-truth test dataset across all eight agents, held out from every optimization run.
@@ -49,7 +49,7 @@ The team completed all seven user stories and delivered the full 25 story points
 \begin{figure}
 \centering
 \includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{assets/sprints/sprint4-burndown.png}
-\caption{Sprint 4 burndown chart, flat through the sprint and dropping as the two large integration tickets closed.}\label{fig:sprint4-burndown}
+\caption{Sprint 4 burndown chart.}\label{fig:sprint4-burndown}
 \end{figure}
 
 \subsubsection{Sprint Retrospective}\label{sec:sprint4-retrospective}
@@ -59,5 +59,5 @@ The Sprint 4 retrospective used an adapted Sailboat format (\cref{fig:sprint4-sa
 \begin{figure}
 \centering
 \includegraphics[width=0.65\linewidth,height=\textheight,keepaspectratio]{assets/sprints/sprint4-retrospective.jpg}
-\caption{Sailboat retrospective board, with Tailwinds and Delights on the top row and Restraints and Future Risks below.}\label{fig:sprint4-sailboat}
+\caption{Sprint 4 retrospective board in Miro using the Sailboat format.}\label{fig:sprint4-sailboat}
 \end{figure}
