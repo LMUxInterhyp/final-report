@@ -27,7 +27,7 @@ Each operation is represented as a Convex job that the worker claims and updates
 
 \subsubsection{Python Worker}\label{sec:python-worker}
 
-Python was retained because its machine-learning ecosystem provides the libraries and integrations required for embedding, model access, evaluation, and optimization.\autocite{raschka-python-ml} The worker owns all pipeline logic, including Stage 1 and Stage 2 routing, agent generation, judging, batch processing, index construction, and OPRO; Convex only schedules these operations and persists their state.
+Python was retained because its machine-learning ecosystem provides the libraries and integrations required for embedding, model access, evaluation, and optimization.\autocite{raschka-python-ml} The worker owns all pipeline logic, including Stage 1 and Stage 2 routing, agent generation, judging, batch processing, index construction, and OPRO, while Convex only schedules these operations and persists their state.
 
 Provider interfaces decouple routing, completion, judging, optimization, and embedding from individual model services. Configuration selects execution mode, model identifiers, endpoints, timeouts, and credentials without changing the job protocol, trace model, or pipeline interfaces. Convex and React therefore form the showcase environment, while the worker remains reusable and could be adapted to Interhyp-approved endpoints. Such an integration was not performed.
 
@@ -53,7 +53,7 @@ The React single-page frontend uses Vite, TypeScript, and Tailwind CSS to start 
 
 Frontend and worker access follow separate authorization paths. Users authenticate through Clerk and Convex email and domain allowlists, whereas the Python worker supplies a shared token accepted only by worker-facing functions. A frontend session therefore cannot invoke worker operations, and the worker token grants no frontend access.
 
-Netlify serves the React build, Convex Cloud hosts state, and Fly.io runs the containerized worker, with a Fly volume retaining the FastEmbed cache. Moving the frontend from Vercel to Netlify avoided a projected USD 300 cost, while Ollama remained available only for local development. These boundaries were sufficient for the controlled showcase; production integration would require Interhyp to evaluate service identity and secret management.
+Netlify serves the React build, Convex Cloud hosts state, and Fly.io runs the containerized worker, with a Fly volume retaining the FastEmbed cache. Moving the frontend from Vercel to Netlify avoided a projected USD 300 cost, while Ollama remained available only for local development. These boundaries were sufficient for the controlled showcase, although production integration would require Interhyp to evaluate service identity and secret management.
 
 \subsection{Application Workflows and User Interface}\label{sec:application-workflows}
 
