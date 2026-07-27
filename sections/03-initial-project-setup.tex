@@ -95,11 +95,9 @@ The frequencies above are a deliberately flattened version of Interhyp's own tra
 
 \subsection{Local Model Setup}\label{sec:local-models}
 
-Neither the university nor Interhyp could provide a token budget, so any hosted capacity had to be paid for by the team itself. We learned this during Sprint 1, added SCRUM-22 mid-sprint to resolve it, and settled on running local models through Ollama, using Gemma 4 at whatever size each team member's machine could handle, with OpenRouter as the path for cloud deployments and a privately purchased token budget for the first tests of the optimizer, where the local model proved to be too slow.
+Lacking a token budget from the university or Interhyp, we initially ran local models (Gemma 4 via Ollama) on personal machines, supplemented by OpenRouter and privately funded tokens for early optimizer tests when local processing proved too slow.
 
-The trade-off was that local models are weaker than production-grade hosted ones and results obtained on them do not automatically transfer, which is a threat to the external validity of everything we measured. What made the constraint tolerable is that our optimization target is a routing decision rather than a generated answer, and routing degrades more gracefully than generation when model capability drops, especially since Interhyp themselves use a smaller model for routing. It also turned out that the constraint had an upside we did not plan for. Ollama exposes token log probabilities, which is what Stage 2 of the router reads to produce a scored distribution over the eight agents instead of a single label (\cref{sec:router-stage2}), and that signal remained useful enough that the production configuration still routes Stage 2 through a local model even after AWS Bedrock became available for the judge and the optimizer.
-
-Model capability was raised later where it actually mattered. Once the free AWS credits were confirmed in Sprint 3, the judge and the optimizer, the two components where a weak model directly corrupts the feedback signal, moved to hosted models, while the router and the agents stayed local. The reasoning is described in \cref{sec:judge,sec:optimizer}.
+While weaker local models threaten external validity, this constraint was tolerable because routing degrades gracefully, especially since Interhyp themselves use a smaller model for routing.
 
 \subsection{KPIs and Metrics}\label{sec:kpis}
 
