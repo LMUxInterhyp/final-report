@@ -27,6 +27,6 @@ The generated PDF is written to `build/main.pdf`.
 - `main.tex` defines the report order and front matter.
 - `metadata.tex` contains title-page and PDF metadata.
 - `sections/` contains the report chapters and component fragments.
-- `frontmatter/` contains the abstract, highlights, and declaration.
+- `frontmatter/` contains the abstract and declaration.
 - `assets/` contains the consolidated figures and the named signature-image slots.
 - `references.bib` is the shared bibliography.
