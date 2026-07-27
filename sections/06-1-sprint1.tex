@@ -4,7 +4,7 @@
 
 Sprint 1 ran from 28 April to 11 May 2026, with Julius acting as Scrum Master. Following the preliminary organization in Sprint 0, it focused on setting up the working environment, conducting the initial research, forming a first view of the pipeline architecture, and taking the first steps toward the showcase interface. The sprint goal combined five workstreams: establishing the project and development environment, delivering a first showcase-application increment, clarifying access to suitable language models, defining relevant evaluation metrics, and deriving an initial pipeline architecture from scientific research. The sprint was initially planned with 25 story points, corresponding to five points for each team member. Its purpose was to reduce the principal uncertainties of the project rather than to deliver a complete pipeline.
 
-Responsibilities followed these workstreams. Marco established the Jira structure and led the research on LLM judges, judge panels, and their biases. Julius created the repositories and initial application, implemented the first chatbot interface, prepared the sprint documentation, and coordinated the sprint. Mohsin investigated inference-token access and external providers. Sebastian selected and documented the local Ollama setup and researched multi-agent routing. Gáspár defined the initial metrics and researched prompt optimization, DSPy, and self-improving pipelines. The architecture, MVP definition, repository strategy, and Sprint Review were developed collaboratively.
+Responsibilities followed the main components: Marco established Jira and researched judges and their biases; Julius created the repositories and initial application and coordinated the sprint; Mohsin investigated model providers; Sebastian covered local models and routing; and Gáspár developed the metrics and optimizer research. The architecture, MVP, repository strategy, and Sprint Review were collaborative.
 
 \Cref{fig:sprint1-backlog} shows the six work items recorded in Jira at the end of the sprint, including the additional two-point task for establishing a local LLM setup after no external token provider was available.
 
@@ -75,9 +75,3 @@ Two actions were adopted for Sprint 2. First, a recurring in-person working sess
 \captionof{figure}{Sprint 1 retrospective action items showing owners and deadlines.}
 \label{fig:sprint1-retrospective-actions}
 \end{center}
-
-\subsubsection{Sprint Conclusion and Outlook}\label{sec:sprint1-conclusion}
-
-Sprint 1 moved the project from a broad brief to a structured development environment and a concrete, research-informed architecture. The team established its repositories and workflow, delivered the first showcase-application increment, resolved the immediate model-access blocker, and defined an evaluation perspective spanning quality, latency, and cost. It also proposed how live interaction, trace collection, evaluation, and optimization could be separated.
-
-The sprint created the conditions for experimentation rather than the completed pipeline itself. Sprint 2 would therefore define the concrete multi-agent scenario and specialist agents, establish the evaluation data, implement the first Router and judge components, and begin testing the proposed architecture in working code.
