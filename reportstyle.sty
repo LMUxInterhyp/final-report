@@ -98,13 +98,17 @@
 \newcommand{\subsectionauthorlabel}[1]{%
   {\fontsize{9.5}{12}\selectfont (#1)}%
 }
+% The author mark must be emitted after the heading, not before it. Sectioning
+% commands are prefixed with \FloatBarrier, so a mark placed first is contributed
+% to the page that flushes the previous author's deferred figures, and the footer
+% then credits the incoming author for pages that belong to the outgoing one.
 \newcommand{\authoredsection}[3]{%
-  \reportauthor{#3}%
   \section{\texorpdfstring{#1\space\sectionauthorlabel{#2}}{#1 (#2)}}%
+  \reportauthor{#3}%
 }
 \newcommand{\authoredsubsection}[3]{%
-  \reportauthor{#3}%
   \subsection{\texorpdfstring{#1\space\subsectionauthorlabel{#2}}{#1 (#2)}}%
+  \reportauthor{#3}%
 }
 \fancyfoot[R]{\thepage}
 \fancyfoot[L]{\footnotesize\color{black!45}\firstmarks\reportauthormarks}
