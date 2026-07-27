@@ -172,21 +172,13 @@ Stage 3 gave up on realism altogether and split all eight agents equally at maxi
 
 Stage 4 served as a 2,000-item sanity check to verify whether Stage 3's results generalized. It reintroduced a slight class skew and less complex prompts, while still including all of the complex ones.
 
-\subsubsection{Difficulty Engineering}\label{sec:dataset-difficulty}
+\subsubsection{Difficulty and Label Integrity}\label{sec:dataset-difficulty}
 
-To systematically evaluate the routing accuracy of our agentic pipeline beyond standard aggregate metrics, we adopted the behavioral testing methodology introduced by \textcite{ribeiro2020checklist}, engineering our synthetic data to validate specific linguistic capabilities through targeted input perturbations.
+Difficulty was engineered rather than sampled. Following the behavioral testing methodology of \textcite{ribeiro2020checklist}, every prompt was perturbed to attack one specific capability the router needs, through a fixed catalogue of nine mechanisms: a buried or ambiguous trigger, typographical errors, non-native grammar, an unusual synonym, a long multi-topic text hiding the real request, pasted-in irrelevant content, a keyword seeded from a competing agent, domain-term camouflage, and code-switching into German. The rationale for perturbing inputs this way is set out in that work.
 
-Difficulty was introduced through nine controlled corruption mechanisms applied to the prompt surface: an ambiguous or buried trigger, typographical errors (\enquote{drativ an emial}, \enquote{fourr-eyes chekc}), non-native grammar, a difficult synonym for the trigger (\enquote{knock together a few lines to the vendor}), a long incoherent multi-topic text with the real ask embedded in it, pasted-in irrelevant content such as signature blocks or forwarded threads, a lexical trap seeding a competing agent's keyword, domain-term camouflage dressing a legal question in market vocabulary, and code-switching into German terminology (Grundbuch, Teilungserklärung, MaBV).
+The constraint on the catalogue matters more than its contents. Every perturbation must be label-preserving: it may disguise the correct agent, but it may never change it. An item that a competent human applying the labeling rules cannot resolve is not a hard example, it is a specification defect, so a random sample was read manually and any batch containing such items was regenerated. Those rules were fixed in advance as per-agent scopes, boundary tiebreakers, and few-shot examples for the ambiguous cases.
 
-Every corruption mechanism must be label-preserving. Corruption may disguise the correct agent, but it may never change it. An item that a competent human applying the labeling rules cannot resolve is not a hard example, it is a specification defect. A random sample of the generated prompts was therefore checked manually, and where such examples were found the whole sample was regenerated with those items included as negative examples.
-
-\subsubsection{Label Integrity, Serialization, and Contamination}\label{sec:dataset-integrity}
-
-Label integrity was governed by predefined scopes, boundary tiebreakers, and explicit rules for handling ambiguous items, described in \cref{sec:dataset-difficulty}, including few-shot examples.
-
-To accommodate evolving input requirements as the project progressed, the generation pipeline was adapted to produce both CSV and JSON files.
-
-Contamination was treated as critically as label accuracy. As Julian identified during a mid-sprint alignment \autocite{interhyp-meetings}, drawing the examples that seed the router's Stage 1 vector index from the evaluation set would result in the embedding model \enquote{successfully} routing queries it had already seen, rendering the accuracy metric unusable. Consequently, router Stage 1 examples were sourced from a separate part of the dataset, or were maintained from an earlier generation of the golden dataset that had been retired from evaluation use, so that no prompt was ever both a seed example and a live evaluation item.
+The remaining risk is contamination. As Julian pointed out during a mid-sprint alignment \autocite{interhyp-meetings}, seeding the router's Stage 1 vector index from the evaluation set would let the embedding model \enquote{succeed} on queries it had already seen and make the accuracy figure unusable. Stage 1 examples were therefore drawn from a separate part of the dataset, or from an earlier generation of it that had been retired from evaluation use, so that no prompt was ever both a seed example and a live evaluation item.
 
 \subsubsection{Limitations}\label{sec:dataset-limitations}
 
