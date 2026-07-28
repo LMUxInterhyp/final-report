@@ -1,32 +1,44 @@
-# Final report
+# Self-Improving Evaluation Pipeline
 
-This repository contains the consolidated LaTeX project for the Digital Innovation Lab report, **Self-Improving Evaluation Pipeline for a Multi-Task Chatbot**.
+**Final report for the Digital Innovation Lab · LMU × Interhyp**
 
-## Current PDF
+[Read the latest report](https://lmuxinterhyp.github.io/final-report/final-report.pdf) ·
+[View build status](https://github.com/LMUxInterhyp/final-report/actions/workflows/publish-pdf.yml)
 
-[![Build and publish report PDF](https://github.com/LMUxInterhyp/final-report/actions/workflows/publish-pdf.yml/badge.svg)](https://github.com/LMUxInterhyp/final-report/actions/workflows/publish-pdf.yml)
+[![Report build](https://github.com/LMUxInterhyp/final-report/actions/workflows/publish-pdf.yml/badge.svg)](https://github.com/LMUxInterhyp/final-report/actions/workflows/publish-pdf.yml)
 
-[Open the latest successful build](https://lmuxinterhyp.github.io/final-report/final-report.pdf).
+This repository contains the LaTeX source for *Self-Improving Evaluation
+Pipeline for a Multi-Task Chatbot*. The report documents the design,
+implementation, and evaluation of an adaptive evaluation pipeline.
 
-GitHub Actions rebuilds the report for every push to `main` and publishes the PDF directly through GitHub Pages. The link opens the browser's native PDF viewer, which also provides the download controls. Pull requests compile the report without updating the published version.
+## Build locally
 
-Before the first deployment, select **GitHub Actions** under **Settings → Pages → Build and deployment → Source**.
-
-## Build
-
-The project uses pdfLaTeX, Biber, and `latexmk`.
+You need a TeX distribution with pdfLaTeX, Biber, and `latexmk`.
 
 ```sh
 make pdf
 ```
 
-The generated PDF is written to `build/main.pdf`.
+The generated report is available at `build/main.pdf`.
 
-## Project structure
+| Command | Purpose |
+| --- | --- |
+| `make pdf` | Build the report |
+| `make watch` | Rebuild when source files change |
+| `make check` | Check the LaTeX source |
+| `make clean` | Remove generated files |
 
-- `main.tex` defines the report order and front matter.
-- `metadata.tex` contains title-page and PDF metadata.
-- `sections/` contains the report chapters and component fragments.
-- `frontmatter/` contains the abstract and declaration.
-- `assets/` contains the consolidated figures and the named signature-image slots.
-- `references.bib` is the shared bibliography.
+## Repository layout
+
+```text
+.
+├── main.tex          # Report entry point
+├── metadata.tex      # Title page and PDF metadata
+├── sections/         # Report chapters
+├── frontmatter/      # Abstract and declaration
+├── assets/           # Figures and images
+└── references.bib    # Bibliography
+```
+
+Every push to `main` builds and publishes the latest PDF through GitHub Pages.
+Pull requests compile the report without replacing the published version.
